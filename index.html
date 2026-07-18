@@ -40,7 +40,7 @@ footer{background:#0a0c0f;color:#aeb1b6;padding:31px 0 45px;font-size:10px}.foot
 <body>
 <div class="utility"><div class="wrap"><div>Denver Metro · Mortgage & Housing Intelligence</div><div>Presented by Citywide Home Mortgage</div><div class="live"><span class="dot"></span>Live briefing</div></div></div>
 <header class="masthead"><div class="wrap mast-grid"><div class="edition">Monday Edition<br><span id="updatedTop">Updated July 16, 2026</span></div><div class="brand"><div class="brand-title">The Smith Report</div><div class="brand-sub">Denver Mortgage & Housing Intelligence</div><div class="presented">Presented by Scott Smith at Citywide Home Mortgage</div></div><div class="actions"><button class="btn js-ref" type="button">Refer a Client</button><a class="btn primary" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div></div></header>
-<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#dashboard">Market Dashboard</a><a href="#plays">Financing Plays</a><a href="#news">Housing News</a><a href="#tools">Agent Tools</a><a href="#partner">Citywide Financing Desk</a><button class="js-ref" type="button">Refer a Client</button></div></nav>
+<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#programs">Rates</a><a href="#dashboard">Market Dashboard</a><a href="#plays">Financing Plays</a><a href="#news">Housing News</a><a href="#tools">Agent Tools</a><a href="#partner">Citywide Financing Desk</a><button class="js-ref" type="button">Refer a Client</button></div></nav>
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
 <main>
 <section id="lead"><div class="wrap"><div class="dateline"><span>DENVER, COLORADO</span><span>Market period: <b id="period">June 2026</b> · DMAR, Freddie Mac and live market feeds</span></div><div class="hero reveal"><article class="lead"><img class="hero-image" src="assets/images/hero-denver.png" alt="Denver skyline and mortgage market workspace at golden hour"><div class="eyebrow">The Monday Lead</div><h1 class="headline" id="headline">Buyers finally have leverage. The question is whether they can afford to use it.</h1><p class="dek">Denver’s inventory reset has created the strongest negotiating environment buyers have seen in years. Financing—not competition—is now the decisive variable.</p><div class="byline">Analysis by Scott Smith · Mortgage Loan Originator · NMLS #2244351</div><div class="bottom-line"><div class="eyebrow">What it means for agents</div><p>More homes are available, sellers are more flexible and condition matters again. The opportunity belongs to agents who convert leverage into a monthly payment the buyer can accept.</p></div></article><aside class="data-rail"><h2>Denver at a glance</h2><div id="metrics"></div><div class="quote"><div class="quote-text">“Condition has quietly become the currency that matters most.”</div><div class="quote-by">— Amanda Snitker, DMAR Market Trends Committee</div></div></aside></div></div></section>
@@ -72,7 +72,7 @@ function openTool(name){document.querySelectorAll('.tool-button').forEach(b=>b.c
 document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');
 const modal=$('refModal');function openRef(){modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'}function closeRef(){modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow=''}document.querySelectorAll('.js-ref').forEach(b=>b.addEventListener('click',openRef));$('closeRef').onclick=$('cancelRef').onclick=closeRef;modal.addEventListener('click',e=>{if(e.target===modal)closeRef()});document.addEventListener('keydown',e=>{if(e.key==='Escape')closeRef()});
 $('refForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('sendRef');btn.disabled=true;btn.textContent='Sending…';const payload={client:{first_name:$('clientFirst').value.trim(),last_name:$('clientLast').value.trim(),phone:$('clientPhone').value.trim(),email:$('clientEmail').value.trim(),loan_purpose:$('clientPurpose').value,timeline:$('clientTimeline').value,notes:$('refNotes').value.trim(),consent:true},referrer:{name:$('agentName').value.trim(),brokerage:$('agentBrokerage').value.trim(),phone:$('agentPhone').value.trim(),email:$('agentEmail').value.trim()},source:'the_smith_report_referral',event_source_url:location.href};try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-referral',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error();$('refForm').style.display='none';$('refSuccess').style.display='block';if(window.fbq)fbq('trackCustom','AgentClientReferral',{content_name:'The Smith Report'})}catch(err){alert('The referral could not be submitted. Please call or text Scott at 720-252-7037.');btn.disabled=false;btn.textContent='Send Referral'}});
-$('optinForm').addEventListener('submit',async e=>{e.preventDefault();if(!$('consent').checked)return;const btn=$('submitBtn');btn.disabled=true;btn.textContent='Adding you…';try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-optin',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv','Authorization':'Bearer sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv'},body:JSON.stringify({first_name:$('first').value.trim(),last_name:$('last').value.trim(),full_name:$('first').value.trim()+' '+$('last').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),brokerage:$('brokerage').value.trim(),source:'the_smith_report',consent:true,event_source_url:location.href})});if(!r.ok)throw Error();$('optinForm').style.display='none';$('optinSuccess').style.display='block'}catch(err){alert('Something went wrong. Please text Scott directly to be added.');btn.disabled=false;btn.textContent='Get Scott’s Brief'}});
+$('optinForm').addEventListener('submit',async e=>{e.preventDefault();if(!$('consent').checked)return;const btn=$('submitBtn');btn.disabled=true;btn.textContent='Adding you…';const evtId='lead.'+Date.now()+'.'+Math.random().toString(36).slice(2,10);try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-optin',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv','Authorization':'Bearer sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv'},body:JSON.stringify({first_name:$('first').value.trim(),last_name:$('last').value.trim(),full_name:$('first').value.trim()+' '+$('last').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),brokerage:$('brokerage').value.trim(),source:'the_smith_report',consent:true,event_id:evtId,event_source_url:location.href})});if(!r.ok)throw Error();if(window.fbq)fbq('track','Lead',{content_name:'The Smith Report — Weekly Brief'},{eventID:evtId});$('optinForm').style.display='none';$('optinSuccess').style.display='block'}catch(err){alert('Something went wrong. Please text Scott directly to be added.');btn.disabled=false;btn.textContent='Get Scott’s Brief'}});
 const observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');observer.unobserve(x.target)}}),{threshold:.08});document.querySelectorAll('.reveal,.section').forEach(el=>{el.classList.add('reveal');observer.observe(el)});
 </script>
 <style>
@@ -92,10 +92,93 @@ const observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){
    values if the feed is unreachable. */
 (function(){
   var FEED="https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/market-feed";
-  var QUOTES=[['Buy land — they’re not making it anymore.','Mark Twain'],['Don’t wait to buy real estate. Buy real estate and wait.','Will Rogers'],['Ninety percent of all millionaires become so through owning real estate.','Andrew Carnegie'],['The best investment on Earth is earth.','Louis Glickman'],['Price is what you pay; value is what you get.','Warren Buffett'],['Real estate cannot be lost or stolen, nor can it be carried away.','Franklin D. Roosevelt']];
+  var QUOTES=[
+    ['Buy land — they’re not making it anymore.','Mark Twain'],
+    ['Don’t wait to buy real estate. Buy real estate and wait.','Will Rogers'],
+    ['The best investment on Earth is earth.','Louis Glickman'],
+    ['Real estate cannot be lost or stolen, nor can it be carried away.','Franklin D. Roosevelt'],
+    ['Ninety percent of all millionaires become so through owning real estate.','Andrew Carnegie'],
+    ['Landlords grow rich in their sleep.','John Stuart Mill'],
+    ['Real estate is an imperishable asset, ever increasing in value.','Russell Sage'],
+    ['Owning a home is a keystone of wealth — both financial affluence and emotional security.','Suze Orman'],
+    ['Land monopoly is the mother of all monopoly.','Winston Churchill'],
+    ['Price is what you pay; value is what you get.','Warren Buffett'],
+    ['Risk comes from not knowing what you’re doing.','Warren Buffett'],
+    ['Be fearful when others are greedy, and greedy when others are fearful.','Warren Buffett'],
+    ['The stock market transfers money from the impatient to the patient.','Warren Buffett'],
+    ['Someone is sitting in the shade today because someone planted a tree long ago.','Warren Buffett'],
+    ['Do not save what is left after spending; spend what is left after saving.','Warren Buffett'],
+    ['An investment in knowledge pays the best interest.','Benjamin Franklin'],
+    ['Beware of little expenses; a small leak will sink a great ship.','Benjamin Franklin'],
+    ['A penny saved is a penny earned.','Benjamin Franklin'],
+    ['Rather go to bed without dinner than to rise in debt.','Benjamin Franklin'],
+    ['If you would be wealthy, think of saving as well as getting.','Benjamin Franklin'],
+    ['Well done is better than well said.','Benjamin Franklin'],
+    ['It’s not how much money you make, but how much you keep.','Robert Kiyosaki'],
+    ['The rich buy assets. The poor buy liabilities they think are assets.','Robert Kiyosaki'],
+    ['Know what you own, and know why you own it.','Peter Lynch'],
+    ['In investing, what is comfortable is rarely profitable.','Robert Arnott'],
+    ['The four most dangerous words in investing: this time it’s different.','Sir John Templeton'],
+    ['The individual should act consistently as an investor, not a speculator.','Benjamin Graham'],
+    ['Formal education makes you a living; self-education makes you a fortune.','Jim Rohn'],
+    ['Either you run the day or the day runs you.','Jim Rohn'],
+    ['If you really want to do something, you’ll find a way — or an excuse.','Jim Rohn'],
+    ['The quickest way to double your money is to fold it and put it back in your pocket.','Will Rogers'],
+    ['Wealth consists not in having great possessions, but in having few wants.','Epictetus'],
+    ['Don’t tell me where your priorities are. Show me where you spend your money.','James W. Frick'],
+    ['Compound interest is the eighth wonder of the world.','Attributed to Albert Einstein'],
+    ['The habit of saving is itself an education.','T.T. Munger'],
+    ['The way to get started is to quit talking and begin doing.','Walt Disney'],
+    ['Do what you do so well that they will want to see it again and bring their friends.','Walt Disney'],
+    ['Success is walking from failure to failure with no loss of enthusiasm.','Winston Churchill'],
+    ['Success is not final, failure is not fatal: it is the courage to continue that counts.','Winston Churchill'],
+    ['Opportunities don’t happen. You create them.','Chris Grosser'],
+    ['The harder I work, the luckier I get.','Samuel Goldwyn'],
+    ['Whether you think you can or you think you can’t, you’re right.','Henry Ford'],
+    ['Quality is not an act, it is a habit.','Aristotle'],
+    ['Start where you are. Use what you have. Do what you can.','Arthur Ashe'],
+    ['Genius is one percent inspiration and ninety-nine percent perspiration.','Thomas Edison'],
+    ['Opportunity is missed by most because it is dressed in overalls and looks like work.','Thomas Edison'],
+    ['I never dreamed about success. I worked for it.','Estée Lauder'],
+    ['The secret of getting ahead is getting started.','Mark Twain'],
+    ['Action is the foundational key to all success.','Pablo Picasso'],
+    ['Motivation gets you going; discipline keeps you growing.','John C. Maxwell'],
+    ['People don’t care how much you know until they know how much you care.','Theodore Roosevelt'],
+    ['Believe you can and you’re halfway there.','Theodore Roosevelt'],
+    ['The best way to predict the future is to create it.','Peter Drucker'],
+    ['A goal without a plan is just a wish.','Antoine de Saint-Exupéry'],
+    ['Nothing will work unless you do.','Maya Angelou'],
+    ['The ache for home lives in all of us.','Maya Angelou'],
+    ['Great things are done by a series of small things brought together.','Vincent van Gogh'],
+    ['Hard work beats talent when talent doesn’t work hard.','Tim Notke'],
+    ['The expert in anything was once a beginner.','Helen Hayes'],
+    ['Don’t watch the clock; do what it does. Keep going.','Sam Levenson'],
+    ['Success usually comes to those too busy to be looking for it.','Henry David Thoreau'],
+    ['Wealth is the ability to fully experience life.','Henry David Thoreau'],
+    ['Home is the nicest word there is.','Laura Ingalls Wilder'],
+    ['Homeownership is the cornerstone of a strong community.','Rick Renzi'],
+    ['Fall seven times, stand up eight.','Japanese proverb'],
+    ['Slow and steady wins the race.','Aesop'],
+    ['The best time to plant a tree was 20 years ago. The second best time is now.','Proverb'],
+    ['Marry the house, date the rate.','Real estate proverb'],
+    ['Interest rates are temporary; the right home is not.','Proverb'],
+    ['Time in the market beats timing the market.','Proverb'],
+    ['The market rewards the prepared, not the anxious.','Proverb'],
+    ['A house is made of walls and beams; a home is built with love and dreams.','Proverb'],
+    ['A home is a place your feet may leave, but never your heart.','Proverb'],
+    ['Buy on the fringe and wait.','Real estate proverb'],
+    ['Location, location, location.','Real estate proverb'],
+    ['A great agent doesn’t sell houses — they solve problems.','Proverb'],
+    ['The best time to buy was yesterday; the next best time is today.','Proverb'],
+    ['Every home is a story waiting for the right family.','Proverb'],
+    ['Buying a home is the biggest deposit most of us make on our future.','Proverb'],
+    ['You don’t buy the market; you buy the home.','Proverb']
+  ];
   function esc(s){return String(s==null?'':s).replace(/[<>&]/g,function(c){return{'<':'&lt;','>':'&gt;','&':'&amp;'}[c];});}
   function progCard(label,value,change,dir,cls){var pos=change&&String(change).charAt(0)!=='-';var chip=change?'<span class="prog-chg '+(pos?'down':'up')+'">'+(pos?'▲':'▼')+' '+esc(change)+'</span>':'';return '<div class="prog-card '+(cls||'')+'"><div class="prog-l">'+esc(label)+'</div><div class="prog-v">'+esc(value)+'</div>'+chip+'</div>';}
-  function setTicker(items){var tk=document.getElementById('tickerTrack');if(!tk||!items.length)return;var out=[],qi=0;items.forEach(function(it,i){var c=it[2];out.push('<span class="tick"><b>'+esc(it[0])+'</b><span>'+esc(it[1])+'</span>'+(c?'<span class="'+(String(c).charAt(0)==='-'?'down':'up')+'">'+esc(c)+'</span>':'')+'</span>');if((i+1)%3===0){var q=QUOTES[qi%QUOTES.length];qi++;out.push('<span class="tick qtick">“'+esc(q[0])+'” <em>— '+esc(q[1])+'</em></span>');}});var H=out.join('');tk.innerHTML=H+H;}
+  function qspan(q){return '<span class="tick qtick">“'+esc(q[0])+'” <em>— '+esc(q[1])+'</em></span>';}
+  function shuffle(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t;}return a;}
+  function setTicker(items){var tk=document.getElementById('tickerTrack');if(!tk||!items.length)return;var nums=items.map(function(it){var c=it[2];return '<span class="tick"><b>'+esc(it[0])+'</b><span>'+esc(it[1])+'</span>'+(c?'<span class="'+(String(c).charAt(0)==='-'?'down':'up')+'">'+esc(c)+'</span>':'')+'</span>';});var picks=shuffle(QUOTES).slice(0,14),out=[],ni=0;picks.forEach(function(q){out.push(nums[ni++%nums.length]);out.push(qspan(q));});var H=out.join('');tk.innerHTML=H+H;}
   function setPrograms(list){var pg=document.getElementById('programGrid');if(!pg||!list.length)return;pg.innerHTML=list.map(function(p){return progCard(p[0],p[1],p[2],p[3],p[4]);}).join('');}
   // Baked fallback — VA/FHA/Jumbo + quotes render instantly, even before (or without) the live feed.
   setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);
