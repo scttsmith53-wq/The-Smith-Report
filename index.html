@@ -12,13 +12,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/report.css?v=3">
+<link rel="stylesheet" href="assets/css/report.css?v=4">
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','879134155809312');fbq('track','PageView');
 </script>
 </head>
-<body>
-<div class="utility"><div class="wrap"><div>Denver Metro · Mortgage & Housing Intelligence</div><div>Presented by Scott Smith · Citywide Home Mortgage</div><div class="live"><span class="dot"></span>Live briefing</div></div></div>
+<body data-audience="agent">
+<div class="utility"><div class="wrap"><div id="utilityAudience">Denver Metro · Mortgage & Housing Intelligence</div><div>Presented by Scott Smith · Citywide Home Mortgage</div><div class="live"><span class="dot"></span>Live briefing</div></div></div>
 <header class="masthead">
   <div class="wrap mast-grid">
     <div class="edition"><span id="editionTop">Monday Edition</span><br><span id="updatedTop">Updated today</span></div>
@@ -26,14 +26,19 @@
       <img class="brand-mark" src="https://portal.smithapprovesme.com/buyer-hub-icon-192.png?v=6" alt="">
       <span class="brand-copy"><span class="brand-title">The Smith Report</span><span class="brand-sub">Market intelligence for better buyer conversations</span></span>
     </a>
-    <div class="actions"><button class="btn js-ref" type="button">Refer a Client</button><a class="btn primary" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div>
+    <div class="actions"><div class="audience-switch" aria-label="Report audience"><button type="button" data-set-audience="client">Public</button><button type="button" data-set-audience="agent">Realtor</button></div><button class="btn js-ref agent-only" type="button">Refer a Client</button><a class="btn primary" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div>
   </div>
 </header>
-<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#snapshot">Snapshot</a><a href="#dashboard">Dashboard</a><a href="#programs">Rates</a><a href="#plays">Financing Plays</a><a href="#news">News</a><a href="#tools">Agent Tools</a><a href="#partner">Financing Desk</a><button class="js-ref" type="button">Refer a Client</button></div></nav>
+<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#snapshot">Snapshot</a><a href="#dashboard">Dashboard</a><a href="#programs">Rates</a><a href="#plays">Financing Plays</a><a href="#news">News</a><a href="#tools">Agent Tools</a><a href="#partner">Financing Desk</a><button class="js-ref agent-only" type="button">Refer a Client</button></div></nav>
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
 <main>
 <section id="lead"><div class="wrap">
   <div class="dateline"><span>DENVER, COLORADO</span><span>Market period: <b id="period">June 2026</b> · CAR and live market feeds</span></div><div class="dateline" id="marketSource">Source: Colorado Association of REALTORS®. MLS data; excludes FSBO and some new construction.</div>
+  <div class="market-controls card">
+    <label>County<select id="countySelect"></select></label>
+    <label>Property type<select id="propertyTypeSelect"><option value="single_family">Single-family</option><option value="townhome_condo">Townhome / Condo</option></select></label>
+    <label>City / local area<select id="areaSelect" disabled><option>Available when local-area feed is added</option></select></label>
+  </div>
   <div class="hero reveal">
     <article class="card lead">
       <img class="hero-image" src="assets/images/hero-denver.png" alt="Denver skyline and mortgage market workspace at golden hour">
@@ -42,7 +47,7 @@
         <h1 class="headline">Buyers finally have leverage. The question is whether they can afford to use it.</h1>
         <p class="dek">Denver’s inventory reset has created the strongest negotiating environment buyers have seen in years. Financing—not competition—is now the decisive variable.</p>
         <div class="byline">Analysis by Scott Smith · Mortgage Loan Originator · NMLS #2244351</div>
-        <div class="bottom-line"><div class="eyebrow">What it means for agents</div><p>More homes are available, sellers are more flexible and condition matters again. The opportunity belongs to agents who convert leverage into a monthly payment the buyer can accept.</p></div>
+        <div class="bottom-line"><div class="eyebrow" id="takeawayLabel">What it means for agents</div><p id="takeawayText">More homes are available, sellers are more flexible and condition matters again. The opportunity belongs to agents who convert leverage into a monthly payment the buyer can accept.</p></div>
       </div>
     </article>
     <aside class="card data-rail"><h2 class="rail-title">Denver at a glance</h2><div class="metric-grid" id="metrics"></div><div class="quote"><div class="quote-text">“Condition has quietly become the currency that matters most.”</div><div class="quote-by">— Amanda Snitker, DMAR Market Trends Committee</div></div></aside>
@@ -79,20 +84,33 @@
   </div></div>
 </div></div></section>
 
-<section class="section tools-shell" id="tools"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Conversation tools</div><h2 class="section-title">Run the scenario while you’re talking.</h2></div><div class="section-desc">Fast estimates for payment, buying power, cost of waiting and seller-funded buydowns. Educational only.</div></div><div class="tool-buttons">
+<section class="section tools-shell" id="tools"><div class="wrap"><div class="section-head"><div><div class="eyebrow" id="toolsEyebrow">Conversation tools</div><h2 class="section-title" id="toolsTitle">Run the scenario while you’re talking.</h2></div><div class="section-desc">Fast estimates for payment, buying power, cost of waiting and seller-funded buydowns. Educational only.</div></div><div class="tool-buttons">
   <button class="card tool-button js-tool active" data-tool="payment" type="button"><strong>Payment Calculator</strong><span>Full estimated monthly payment</span></button>
   <button class="card tool-button js-tool" data-tool="buying" type="button"><strong>Buying-Power Estimate</strong><span>Illustrative purchase-price range</span></button>
   <button class="card tool-button js-tool" data-tool="waiting" type="button"><strong>Cost of Waiting</strong><span>Rent plus potential appreciation</span></button>
   <button class="card tool-button js-tool" data-tool="buydown" type="button"><strong>2-1 Buydown</strong><span>Seller concession vs. price cut</span></button>
 </div><div class="card tool-drawer open" id="toolDrawer"></div></div></section>
 
-<section class="section" id="partner"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Your financing desk</div><h2 class="section-title">A lender who protects the agent relationship.</h2></div><div class="section-desc">Your buyer. Your relationship. Citywide mortgage support.</div></div><div class="partner-grid">
+<section class="section" id="partner"><div class="wrap"><div class="section-head"><div><div class="eyebrow" id="partnerEyebrow">Your financing desk</div><h2 class="section-title" id="partnerTitle">A lender who protects the agent relationship.</h2></div><div class="section-desc" id="partnerDesc">Your buyer. Your relationship. Citywide mortgage support.</div></div><div class="partner-grid">
   <div class="card partner-photo-wrap"><img class="partner-photo" src="assets/images/partner-consultation.png" alt="Mortgage consultation with Denver skyline view"></div>
-  <div class="card partner-copy"><div class="eyebrow">Scott Smith · NMLS #2244351</div><h3>Your referral remains credited to you.</h3><p class="trust-line">I connect with your client as the lender, communicate clearly throughout the file and keep the referring agent attached to the relationship.</p><div class="partner-list"><div class="partner-item"><b>Fast pre-approvals</b>Real answers and a strong letter when it is time to write.</div><div class="partner-item"><b>Payment strategy</b>Rate, credits and buydown scenarios before the buyer falls in love.</div><div class="partner-item"><b>Assistance options</b>CHFA and other programs that may reduce cash-to-close.</div><div class="partner-item"><b>Clear communication</b>Proactive updates so the agent is never left guessing.</div></div><div class="partner-actions"><button class="btn primary js-ref" type="button">Refer a Client</button><a class="btn" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Open Client Application</a></div><div class="qr-panel"><img src="assets/images/application-qr.png" alt="QR code for Scott Smith's secure Citywide mortgage application"><div><h4>Client application</h4><p>Scan the code or open the secure Citywide application. This link is tied directly to Scott Smith.</p></div></div></div>
+  <div class="card partner-copy"><div class="eyebrow">Scott Smith · NMLS #2244351</div><h3 id="partnerHeadline">Your referral remains credited to you.</h3><p class="trust-line" id="partnerTrust">I connect with your client as the lender, communicate clearly throughout the file and keep the referring agent attached to the relationship.</p><div class="partner-list"><div class="partner-item"><b>Fast pre-approvals</b>Real answers and a strong letter when it is time to write.</div><div class="partner-item"><b>Payment strategy</b>Rate, credits and buydown scenarios before the buyer falls in love.</div><div class="partner-item"><b>Assistance options</b>CHFA and other programs that may reduce cash-to-close.</div><div class="partner-item"><b>Clear communication</b>Proactive updates so the agent is never left guessing.</div></div><div class="partner-actions"><button class="btn primary js-ref agent-only" type="button">Refer a Client</button><a class="btn" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Open Client Application</a></div><div class="qr-panel"><img src="assets/images/application-qr.png" alt="QR code for Scott Smith's secure Citywide mortgage application"><div><h4>Client application</h4><p>Scan the code or open the secure Citywide application. This link is tied directly to Scott Smith.</p></div></div></div>
 </div></div></section>
 
-<section class="section signup signup-shell" id="brief"><div class="wrap signup-grid"><div><div class="eyebrow">Scott’s Monday Market Brief</div><h2>Keep the useful part of the market in your inbox.</h2><p>Rates, Denver housing data and one financing strategy to use with a buyer this week.</p></div><div><form class="form" id="optinForm"><div class="form-row"><input id="first" required placeholder="First name" autocomplete="given-name"><input id="last" required placeholder="Last name" autocomplete="family-name"></div><input id="phone" required type="tel" placeholder="Cell phone" autocomplete="tel"><input id="brokerage" placeholder="Brokerage (optional)" autocomplete="organization"><input id="email" type="email" placeholder="Email (optional)" autocomplete="email"><label class="check"><input type="checkbox" id="consent" required><span>Yes—text me the weekly Denver metro market update. Reply STOP anytime.</span></label><button class="btn primary" id="submitBtn" type="submit">Get Scott’s Brief</button><div class="fine">Approximately one message per week. Message and data rates may apply. Reply STOP to opt out or HELP for help.</div></form><div class="success" id="optinSuccess"><b>You’re on the list.</b><br>Your first briefing will arrive Monday.</div></div></div></section>
+<section class="section signup signup-shell" id="brief"><div class="wrap signup-grid"><div><div class="eyebrow" id="briefEyebrow">Scott’s Monday Market Brief</div><h2 id="briefTitle">Keep the useful part of the market in your inbox.</h2><p id="briefDesc">Rates, Denver housing data and one financing strategy to use with a buyer this week.</p></div><div><form class="form" id="optinForm"><div class="form-row"><input id="first" required placeholder="First name" autocomplete="given-name"><input id="last" required placeholder="Last name" autocomplete="family-name"></div><input id="phone" required type="tel" placeholder="Cell phone" autocomplete="tel"><input id="brokerage" placeholder="Brokerage (optional)" autocomplete="organization"><input id="email" type="email" placeholder="Email (optional)" autocomplete="email"><label class="check"><input type="checkbox" id="consent" required><span>Yes—text me the weekly Denver metro market update. Reply STOP anytime.</span></label><button class="btn primary" id="submitBtn" type="submit">Get Scott’s Brief</button><div class="fine">Approximately one message per week. Message and data rates may apply. Reply STOP to opt out or HELP for help.</div></form><div class="success" id="optinSuccess"><b>You’re on the list.</b><br>Your first briefing will arrive Monday.</div></div></div></section>
 </main>
+
+<div class="audience-chooser" id="audienceChooser" aria-hidden="true">
+  <div class="audience-card">
+    <img src="https://portal.smithapprovesme.com/buyer-hub-icon-192.png?v=6" alt="">
+    <div class="eyebrow">Choose your report</div>
+    <h2>What brings you here?</h2>
+    <p>You can switch views anytime. The market data and calculators stay the same.</p>
+    <div class="audience-choices">
+      <button type="button" data-set-audience="client"><strong>I’m buying or selling</strong><span>Plain-language market guidance and planning tools</span></button>
+      <button type="button" data-set-audience="agent"><strong>I’m a real estate professional</strong><span>Buyer-conversation strategy, referrals and financing tools</span></button>
+    </div>
+  </div>
+</div>
 
 <div class="modal" id="refModal" aria-hidden="true"><div class="dialog"><div class="dialog-head"><div><div class="eyebrow">Citywide partner referral</div><h2>Refer a client</h2><p style="font-size:11px;color:var(--muted);margin:6px 0 0">Your information is used to match or create your partner record and credit the referral.</p></div><button class="close" id="closeRef" type="button" aria-label="Close">×</button></div><form id="refForm"><div class="ref-grid"><div class="ref-field"><label>Client first name</label><input id="clientFirst" required></div><div class="ref-field"><label>Client last name</label><input id="clientLast" required></div><div class="ref-field"><label>Client phone</label><input id="clientPhone" type="tel" required></div><div class="ref-field"><label>Client email</label><input id="clientEmail" type="email"></div><div class="ref-field"><label>Loan purpose</label><select id="clientPurpose"><option>Purchase</option><option>Refinance</option><option>Not sure</option></select></div><div class="ref-field"><label>Timeline</label><select id="clientTimeline"><option>Ready now</option><option>0–3 months</option><option>3–6 months</option><option>6–12 months</option><option>Not sure</option></select></div><div class="ref-field full"><label>Notes</label><textarea id="refNotes" placeholder="Anything Scott should know before reaching out?"></textarea></div><div class="ref-field"><label>Your name</label><input id="agentName" required></div><div class="ref-field"><label>Your brokerage</label><input id="agentBrokerage"></div><div class="ref-field"><label>Your phone</label><input id="agentPhone" type="tel" required></div><div class="ref-field"><label>Your email</label><input id="agentEmail" type="email" required></div></div><label class="consent"><input id="clientConsent" type="checkbox" required><span>I confirm this client has agreed to be contacted by Scott Smith regarding mortgage financing.</span></label><div class="dialog-actions"><button class="btn" id="cancelRef" type="button">Cancel</button><button class="btn primary" id="sendRef" type="submit">Send Referral</button></div></form><div class="ref-success" id="refSuccess"><b>Referral received.</b><br>The client and referring-agent information were submitted together.</div></div></div>
 
@@ -100,6 +118,6 @@
 
 <button class="sr-fab" id="srFab" aria-label="Ask Scott's AI desk">✦</button>
 <div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
-<script src="assets/js/report.js?v=6" defer></script>
+<script src="assets/js/report.js?v=7" defer></script>
 </body>
 </html>
