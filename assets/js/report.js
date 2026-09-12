@@ -33,7 +33,7 @@ const CHAT='https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-chat';
 
 function esc(s){return String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 function monthlyPI(price,down,rate,term=30){const loan=price*(1-down/100),r=rate/1200,n=term*12;return r?loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):loan/n;}
-function setDate(){const now=new Date();if($('updatedTop'))$('updatedTop').textContent='Live feeds refreshed '+now.toLocaleDateString('en-US',{month:'long',day:'numeric',year:'numeric'});if($('editionTop'))$('editionTop').textContent=now.toLocaleDateString('en-US',{weekday:'long'})+' Edition';if($('period'))$('period').textContent=DATA.period;}
+function setDate(){const now=new Date();if($('updatedTop'))$('updatedTop').textContent='Checking live feeds…';if($('editionTop'))$('editionTop').textContent=now.toLocaleDateString('en-US',{weekday:'long'})+' Edition';if($('period'))$('period').textContent=DATA.period;}
 function spark(a){const w=78,h=21,min=Math.min(...a),max=Math.max(...a),r=max-min||1,pts=a.map((v,i)=>`${2+i*(w-4)/(a.length-1)},${h-3-(v-min)/r*(h-6)}`).join(' '),last=pts.split(' ').at(-1).split(',');return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="#e9c176" stroke-width="2"/><circle cx="${last[0]}" cy="${last[1]}" r="2.3" fill="#e8a33d"/></svg>`;}
 function renderMetrics(){if(!$('metrics'))return;$('metrics').innerHTML=DATA.metrics.map(m=>`<div class="metric"><div class="metric-head"><div class="metric-label">${m.label}</div><div class="metric-value">${m.value}</div></div><div class="metric-foot"><span>${m.note}</span>${spark(m.spark)}</div></div>`).join('');}
 function renderSnapshot(){if(!$('snapshotGrid'))return;$('snapshotGrid').innerHTML=DATA.metrics.map(m=>`<div class="card snapshot-card"><div class="snapshot-label">${m.label}</div><div class="snapshot-value">${m.value}</div><div class="snapshot-note">${m.note}</div></div>`).join('');}
@@ -52,10 +52,12 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
   try {
     const url = FEED_BASE + '?area=' + encodeURIComponent(area) +
       '&property_type=' + encodeURIComponent(propertyType) + '&months=14';
-    const response = await fetch(url);
+    const response = await fetch(url, { cache: 'no-store' });
     if (!response.ok) throw new Error('Market feed HTTP ' + response.status);
     const data = await response.json();
     if (request !== marketRequest || !data || !data.ok) return;
+    showFeedStatus('');
+    if ($('updatedTop')) $('updatedTop').textContent = 'Feed checked ' + new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
     if (Array.isArray(data.car?.areas) && data.car.areas.length) {
       const selector = $('countySelect');
       if (selector) {
@@ -163,7 +165,11 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
       ).join('');
     }
   } catch (error) {
-    console.warn('Market feed unavailable; showing verified fallback data.', error);
+    if (request !== marketRequest) return;
+    showFeedStatus(navigator.onLine ? 'Live market feed unavailable. Displayed figures may be outdated; check back before using them.' :
+      'Offline: this is a saved copy of the report. Market data and rates are not current.');
+    if ($('updatedTop')) $('updatedTop').textContent = 'Live feed unavailable';
+    console.warn('Market feed unavailable; showing historical fallback figures.', error);
   }
 }
 
@@ -299,5 +305,37 @@ function setupReferral(){const modal=$('refModal');if(!modal)return;const open=(
 function setupOptin(){if(!$('optinForm'))return;$('optinForm').addEventListener('submit',async e=>{e.preventDefault();if(!$('consent').checked)return;const btn=$('submitBtn');btn.disabled=true;btn.textContent='Adding you…';const evtId='lead.'+Date.now()+'.'+Math.random().toString(36).slice(2,10);try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-optin',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv','Authorization':'Bearer sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv'},body:JSON.stringify({first_name:$('first').value.trim(),last_name:$('last').value.trim(),full_name:$('first').value.trim()+' '+$('last').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),brokerage:$('brokerage').value.trim(),source:'the_smith_report',consent:true,event_id:evtId,event_source_url:location.href})});if(!r.ok)throw Error();if(window.fbq)fbq('track','Lead',{content_name:'The Smith Report — Weekly Brief'},{eventID:evtId});$('optinForm').style.display='none';$('optinSuccess').style.display='block'}catch(err){alert('Something went wrong. Please text Scott directly to be added.');btn.disabled=false;btn.textContent='Get Scott’s Brief'}})}
 function setupChat(){const chat=$('srChat'),body=$('srBody'),input=$('srInput');if(!chat)return;let msgs=[],opened=false;const add=(role,t)=>{const d=document.createElement('div');d.className='sr-msg '+(role==='user'?'me':'bot');d.textContent=t;body.appendChild(d);body.scrollTop=body.scrollHeight;return d},open=()=>{chat.classList.add('open');if(!opened){opened=true;add('bot',"Hey — I'm Scott's AI desk. Ask me about rates, down payment assistance, or a buyer scenario and I'll give you a straight answer.")}input.focus()},close=()=>chat.classList.remove('open');$('srFab').addEventListener('click',()=>chat.classList.contains('open')?close():open());$('srClose').addEventListener('click',close);async function send(){const t=input.value.trim();if(!t)return;input.value='';add('user',t);msgs.push({role:'user',content:t});const ty=add('bot','…');ty.classList.add('typing');try{const r=await fetch(CHAT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'the_smith_report',messages:msgs.slice(-12)})}),j=await r.json();ty.remove();const rep=j?.reply||"I couldn't reach my desk just then — text Scott directly and he'll jump in.";add('bot',rep);msgs.push({role:'assistant',content:rep})}catch(e){ty.remove();add('bot','Connection hiccup — try again in a moment.')}}$('srSend').addEventListener('click',send);input.addEventListener('keydown',e=>{if(e.key==='Enter')send()})}
 function setupReveal(){const observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');observer.unobserve(x.target)}}),{threshold:.06});document.querySelectorAll('.reveal,.section').forEach(el=>{el.classList.add('reveal');observer.observe(el)})}
-function boot(){setupAudience();setupMarketControls();setDate();renderMetrics();renderSnapshot();inventoryChart();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed('statewide',$('propertyTypeSelect')?.value||'single_family')}
+function showFeedStatus(message){const el=$('feedStatus');if(el){el.hidden=!message;el.textContent=message}}
+function setupPWA(){
+  if ('serviceWorker' in navigator) {
+    const register=()=>navigator.serviceWorker.register('/sw.js').catch((error)=>console.warn('App installation unavailable:',error));
+    if (document.readyState==='complete') register();
+    else window.addEventListener('load',register,{once:true});
+  }
+  let installPrompt;
+  const button=$('installApp');
+  window.addEventListener('beforeinstallprompt',(event)=>{
+    event.preventDefault();
+    installPrompt=event;
+    if(button)button.hidden=false;
+  });
+  button?.addEventListener('click',async()=>{
+    if(!installPrompt)return;
+    const prompt=installPrompt;
+    installPrompt=null;
+    button.hidden=true;
+    await prompt.prompt();
+  });
+  window.addEventListener('appinstalled',()=>{installPrompt=null;if(button)button.hidden=true});
+  window.addEventListener('offline',()=>{
+    showFeedStatus('Offline: this is a saved copy of the report. Market data and rates are not current.');
+    if($('updatedTop'))$('updatedTop').textContent='Offline copy';
+  });
+  window.addEventListener('online',()=>{
+    showFeedStatus('Back online. Checking live market data…');
+    loadFeed($('countySelect')?.value||'statewide',$('propertyTypeSelect')?.value||'single_family');
+  });
+  if(!navigator.onLine)showFeedStatus('Offline: this is a saved copy of the report. Market data and rates are not current.');
+}
+function boot(){setupPWA();setupAudience();setupMarketControls();setDate();renderMetrics();renderSnapshot();inventoryChart();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed('statewide',$('propertyTypeSelect')?.value||'single_family')}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot):boot();
