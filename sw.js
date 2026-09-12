@@ -1,6 +1,6 @@
 /* The Smith Report PWA shell. Live mortgage and market APIs are never cached here. */
 const CACHE_PREFIX = 'smith-report-';
-const CORE_CACHE = CACHE_PREFIX + 'core-v3';
+const CORE_CACHE = CACHE_PREFIX + 'core-v4';
 const IMAGE_CACHE = CACHE_PREFIX + 'images-v1';
 const SHELL = [
   '/',
