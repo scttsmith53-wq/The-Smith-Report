@@ -45,7 +45,7 @@ function renderFallbackNews(){if($('newsList'))$('newsList').innerHTML=DATA.news
 function progCard(label,value,change,cls){const pos=change&&String(change).charAt(0)!=='-';const chip=change?`<span class="prog-chg ${pos?'up':'down'}">${pos?'▲':'▼'} ${esc(change)}</span>`:'';return `<div class="prog-card ${cls||''}"><div class="prog-l">${esc(label)}</div><div class="prog-v">${esc(value)}</div>${chip}</div>`;}
 function setPrograms(list){if($('programGrid'))$('programGrid').innerHTML=list.map(p=>progCard(p[0],p[1],p[2],p[4])).join('');}
 function setTicker(items){if(!$('tickerTrack')||!items.length)return;const nums=items.map(it=>`<span class="tick"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${it[2]?`<span class="${String(it[2]).charAt(0)==='-'?'down':'up'}">${esc(it[2])}</span>`:''}</span>`),out=[];QUOTES.forEach((q,i)=>{out.push(nums[i%nums.length]);out.push(`<span class="tick qtick">“${esc(q[0])}” <em>— ${esc(q[1])}</em></span>`)});const html=out.join('');$('tickerTrack').innerHTML=html+html;}
-function bootFallback(){setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);setPrograms([['CONFORMING','6.56%','+0.03'],['FHA','6.39%','+0.11'],['VA','6.20%','+0.03'],['USDA','6.39%','+0.09'],['JUMBO','6.63%','+0.09'],['DPA','~6.5%','','flat','dpa']]);}
+function bootFallback(){setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);setPrograms([['CONFORMING','6.56%','+0.03'],['FHA','6.39%','+0.11'],['VA','6.20%','+0.03'],['USDA','6.39%','+0.09'],['JUMBO','6.63%','+0.09'],['DPA','~6.875%','','flat','dpa']]);}
 let marketRequest = 0;
 async function loadFeed(area = 'statewide', propertyType = 'single_family') {
   const request = ++marketRequest;
@@ -85,7 +85,7 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
         program.change,
         program.dir
       ]);
-      programs.push(['DPA', data.dpa?.value || 'Unavailable', data.dpa?.change || '', data.dpa?.dir || 'flat', 'dpa']);
+      programs.push(['DPA', data.dpa?.stale ? '~6.875%' : (data.dpa?.value || '~6.875%'), data.dpa?.stale ? '' : (data.dpa?.change || ''), data.dpa?.dir || 'flat', 'dpa']);
       setPrograms(programs);
     }
 
