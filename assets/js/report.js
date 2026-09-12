@@ -309,24 +309,61 @@ function showFeedStatus(message){const el=$('feedStatus');if(el){el.hidden=!mess
 function setupPWA(){
   if ('serviceWorker' in navigator) {
     const register=()=>navigator.serviceWorker.register('/sw.js').catch((error)=>console.warn('App installation unavailable:',error));
-    if (document.readyState==='complete') register();
+    if(document.readyState==='complete')register();
     else window.addEventListener('load',register,{once:true});
   }
-  let installPrompt;
-  const button=$('installApp');
+  const button=$('installApp'),card=$('installCard'),action=$('installCardAction'),steps=$('installSteps');
+  const standalone=window.matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+  const mobile=window.matchMedia('(max-width: 650px)').matches;
+  const ios=/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
+  let installPrompt=null;
+  const dismissedUntil=Number(localStorage.getItem('smith-report-install-dismissed-until')||0);
+  if(button)button.hidden=standalone||!mobile;
+  const showCard=(force=false)=>{
+    if(!standalone&&mobile&&card&&(force||Date.now()>dismissedUntil))card.hidden=false;
+  };
+  const showSteps=()=>{
+    if(!steps)return;
+    steps.textContent=ios ?
+      'On iPhone: open this page in Safari or Chrome, tap Share, then tap Add to Home Screen and Add.' :
+      'In Chrome on Android: tap the three-dot menu (⋮), choose Add to Home screen or Install app, then confirm Install.';
+    steps.hidden=false;
+    if(card)card.hidden=false;
+    if(action)action.textContent='Got it';
+  };
+  const startInstall=async()=>{
+    if(steps&&!steps.hidden){steps.hidden=true;if(card)card.hidden=true;return}
+    if(installPrompt){
+      const prompt=installPrompt;
+      installPrompt=null;
+      try{
+        await prompt.prompt();
+        const choice=await prompt.userChoice;
+        if(choice?.outcome==='accepted'){if(card)card.hidden=true;return}
+      }catch(error){console.warn('Browser install prompt unavailable:',error)}
+    }
+    showCard(true);
+    showSteps();
+  };
+  button?.addEventListener('click',startInstall);
+  action?.addEventListener('click',startInstall);
+  $('installDismiss')?.addEventListener('click',()=>{
+    if(card)card.hidden=true;
+    localStorage.setItem('smith-report-install-dismissed-until',String(Date.now()+14*86400000));
+  });
   window.addEventListener('beforeinstallprompt',(event)=>{
     event.preventDefault();
     installPrompt=event;
     if(button)button.hidden=false;
+    if(action)action.textContent='Install app';
+    showCard();
   });
-  button?.addEventListener('click',async()=>{
-    if(!installPrompt)return;
-    const prompt=installPrompt;
+  window.addEventListener('appinstalled',()=>{
     installPrompt=null;
-    button.hidden=true;
-    await prompt.prompt();
+    if(card)card.hidden=true;
+    if(button)button.hidden=true;
   });
-  window.addEventListener('appinstalled',()=>{installPrompt=null;if(button)button.hidden=true});
+  if(mobile&&!standalone)window.setTimeout(showCard,1100);
   window.addEventListener('offline',()=>{
     showFeedStatus('Offline: this is a saved copy of the report. Market data and rates are not current.');
     if($('updatedTop'))$('updatedTop').textContent='Offline copy';
