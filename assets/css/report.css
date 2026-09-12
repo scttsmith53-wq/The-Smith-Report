@@ -100,3 +100,8 @@ body[data-audience="client"] .agent-only{display:none!important}
   .market-controls{grid-template-columns:1fr}
   .market-controls label:last-child{grid-column:auto}
 }
+
+/* Only show audience-specific resources in the selected report view. */
+.public-only{display:none}
+body[data-audience="client"] .public-only{display:block}
+.resource-thumb{display:grid;place-items:center;background:linear-gradient(135deg,#16365b,#08172a);color:var(--gold-soft);font:800 33px/1 Manrope,Inter,sans-serif;letter-spacing:.08em}
