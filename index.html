@@ -27,7 +27,7 @@ window.addEventListener("beforeinstallprompt", function(event) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/report.css?v=7">
+<link rel="stylesheet" href="assets/css/report.css?v=8">
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','879134155809312');fbq('track','PageView');
 </script>
@@ -39,9 +39,9 @@ window.addEventListener("beforeinstallprompt", function(event) {
     <div class="edition"><span id="editionTop">Monday Edition</span><br><span id="updatedTop">Updated today</span></div>
     <a class="brand" href="#lead" aria-label="The Smith Report home">
       <img class="brand-mark" src="/assets/images/icon-192.png" alt="">
-      <span class="brand-copy"><span class="brand-title">The Smith Report</span><span class="brand-sub">Market intelligence for better buyer conversations</span></span>
+      <span class="brand-copy"><span class="brand-title">The Smith Report</span><span class="brand-sub" id="brandSubtitle">Market intelligence for better buyer conversations</span></span>
     </a>
-    <div class="actions"><div class="audience-switch" aria-label="Report audience"><button type="button" data-set-audience="client">Public</button><button type="button" data-set-audience="agent">Realtor</button></div><button class="btn js-ref agent-only" type="button">Refer a Client</button><a class="btn primary" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div>
+    <div class="actions"><div class="audience-switch" aria-label="Report audience"><button type="button" data-set-audience="client">Public</button><button type="button" data-set-audience="agent">Realtor</button></div><button class="btn js-ref agent-only" type="button">Refer a Client</button><a class="btn primary" id="headerApplication" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div>
   </div>
 </header>
 <aside id="installCard" class="install-card" aria-label="Install The Smith Report" hidden>
@@ -53,7 +53,8 @@ window.addEventListener("beforeinstallprompt", function(event) {
   <button class="btn primary install-action" id="installCardAction" type="button">Install app</button>
 </aside>
 <div id="feedStatus" class="feed-status" role="status" hidden></div>
-<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#snapshot">Snapshot</a><a href="#dashboard">Dashboard</a><a href="#programs">Rates</a><a href="#plays">Financing Plays</a><a href="#news">News</a><a href="#tools">Agent Tools</a><a href="#partner">Financing Desk</a><button class="js-ref agent-only" type="button">Refer a Client</button></div></nav>
+<div id="appUpdate" class="app-update" role="status" hidden>New report version available. <button id="appUpdateReload" type="button">Refresh now</button><button id="appUpdateDismiss" type="button" aria-label="Dismiss update notice">×</button></div>
+<nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#snapshot">Snapshot</a><a href="#dashboard">Dashboard</a><a href="#programs">Rates</a><a href="#plays">Financing Plays</a><a href="#news">News</a><a id="navTools" href="#tools">Agent Tools</a><a id="navPartner" href="#partner">Financing Desk</a><button class="js-ref agent-only" type="button">Refer a Client</button></div></nav>
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
 <main>
 <section id="lead"><div class="wrap">
@@ -93,8 +94,8 @@ window.addEventListener("beforeinstallprompt", function(event) {
   <article class="card play"><div class="eyebrow">Play 03</div><h3>Set the full payment before the showing.</h3><p>Principal, interest, taxes, insurance, mortgage insurance and HOA should be part of the first conversation—not the inspection-week surprise.</p><div class="mini-compare"><div class="mini-row"><span>Purchase price</span><b>$450,000</b></div><div class="mini-row"><span>Illustrative rate</span><b>6.75%</b></div><div class="mini-row"><span>Estimated full payment</span><b id="samplePayment">Calculating…</b></div></div><button class="play-link js-tool" data-tool="payment" type="button">Open the payment tool →</button></article>
 </div></div></section>
 
-<section class="section" id="news"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Worth knowing</div><h2 class="section-title">Housing & mortgage news.</h2></div><div class="section-desc">The stories most likely to surface in buyer, seller and listing conversations this week.</div></div><div class="news-grid">
-  <article class="card feature-news"><img src="assets/images/market-workspace.png" alt="Financial workspace overlooking Denver"><div class="news-copy"><div class="eyebrow">Editor’s focus</div><h3>Inventory is creating leverage. Rates are deciding whether buyers can use it.</h3><p>The market is no longer defined by a single variable. Agents need both a housing read and a financing plan.</p></div></article>
+<section class="section" id="news"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Worth knowing</div><h2 class="section-title">Housing & mortgage news.</h2></div><div class="section-desc" id="newsDescription">The stories most likely to surface in buyer, seller and listing conversations this week.</div></div><div class="news-grid">
+  <article class="card feature-news"><img src="assets/images/market-workspace.png" alt="Financial workspace overlooking Denver"><div class="news-copy"><div class="eyebrow">Editor’s focus</div><h3>Inventory is creating leverage. Rates are deciding whether buyers can use it.</h3><p>The market is no longer defined by a single variable. A housing read and a financing plan both matter.</p></div></article>
   <div class="card news-list" id="newsList"></div>
 </div></div></section>
 
@@ -148,7 +149,7 @@ window.addEventListener("beforeinstallprompt", function(event) {
 <footer><div class="wrap"><div class="footer-row"><img class="footer-mark" src="/assets/images/icon-192.png" alt=""><div><div class="footer-title">The Smith Report</div><div class="footer-citywide">Presented by Scott Smith · Loan Officer · NMLS #2244351 · Citywide Home Mortgage</div></div></div><div>(720) 252-7037 · scott@smithapprovesme.com</div><div class="legal">Guaranteed Rate, Inc. d/b/a Citywide Home Mortgage, NMLS #2611. Applicant subject to credit and underwriting approval. Equal Housing Lender. Not a commitment to lend. Market data and calculator results may be delayed or illustrative and are provided for informational and educational purposes only.</div><div class="realtor-disclosure">Scott Smith is also a licensed Colorado real estate broker affiliated with HomeSmart Realty. Real estate brokerage services are separate from mortgage lending services.</div><div class="sources">Sources: <a href="https://www.dmarealtors.com/market-trends-reports" target="_blank" rel="noopener">DMAR</a> · <a href="https://www.freddiemac.com/pmms" target="_blank" rel="noopener">Freddie Mac</a> · <a href="https://www.chfainfo.com/homeownership/down-payment-assistance" target="_blank" rel="noopener">CHFA</a></div></div></footer>
 
 <button class="sr-fab" id="srFab" aria-label="Ask Scott's AI desk">✦</button>
-<div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
-<script src="assets/js/report.js?v=14" defer></script>
+<div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s" id="chatSubtitle">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
+<script src="assets/js/report.js?v=15" defer></script>
 </body>
 </html>
