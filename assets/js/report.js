@@ -279,6 +279,7 @@ function openTool(name) {
 
 const AUDIENCE_COPY={
   agent:{
+    brandSubtitle:'Market intelligence for better buyer conversations',navTools:'Agent Tools',navPartner:'Financing Desk',headerApplication:'Client Application',chatSubtitle:'AI · market & financing for agents',newsDescription:'The stories most likely to surface in buyer, seller and listing conversations this week.',
     utility:'Denver Metro · Mortgage & Housing Intelligence',
     takeawayLabel:'What it means for agents',
     takeawayText:'More homes are available, sellers are more flexible and condition matters again. The opportunity belongs to agents who convert leverage into a monthly payment the buyer can accept.',
@@ -288,6 +289,7 @@ const AUDIENCE_COPY={
     briefEyebrow:'Scott’s Monday Market Brief',briefTitle:'Keep the useful part of the market in your inbox.',briefDesc:'Rates, Denver housing data and one financing strategy to use with a buyer this week.'
   },
   client:{
+    brandSubtitle:'Housing data and financing for your next move',navTools:'Planning Tools',navPartner:'Your Homebuying Team',headerApplication:'Apply for a Mortgage',chatSubtitle:'AI · housing and financing questions',newsDescription:'Housing and mortgage stories to help you plan your next move.',
     utility:'Colorado Homebuyer · Market & Payment Intelligence',
     takeawayLabel:'What it means for buyers and sellers',
     takeawayText:'More choices can create negotiating room, but the right decision still comes down to the property, your payment and your timeline—not a headline about the market.',
@@ -308,7 +310,23 @@ function setupReveal(){const observer=new IntersectionObserver(es=>es.forEach(x=
 function showFeedStatus(message){const el=$('feedStatus');if(el){el.hidden=!message;el.textContent=message}}
 function setupPWA(){
   if('serviceWorker' in navigator){
-    const register=()=>navigator.serviceWorker.register('/sw.js').catch(error=>console.warn('App installation unavailable:',error));
+    let hasController=Boolean(navigator.serviceWorker.controller);
+    const notice=$('appUpdate');
+    navigator.serviceWorker.addEventListener('controllerchange',()=>{
+      if(hasController&&notice)notice.hidden=false;
+      hasController=true;
+    });
+    $('appUpdateReload')?.addEventListener('click',()=>location.reload());
+    $('appUpdateDismiss')?.addEventListener('click',()=>{if(notice)notice.hidden=true});
+    const register=async()=>{
+      try{
+        const registration=await navigator.serviceWorker.register('/sw.js',{updateViaCache:'none'});
+        const check=()=>registration.update().catch(error=>console.warn('App update check unavailable:',error));
+        check();
+        window.addEventListener('pageshow',check);
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')check()});
+      }catch(error){console.warn('App installation unavailable:',error)}
+    };
     if(document.readyState==='complete')register();
     else window.addEventListener('load',register,{once:true});
   }
