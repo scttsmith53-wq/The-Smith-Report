@@ -73,3 +73,7 @@ body[data-audience="client"] .agent-only{display:none!important}
 .market-controls{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin:14px 0 0;padding:13px 15px;box-shadow:none}.market-controls label{color:var(--muted);font:800 8px Manrope,Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}.market-controls select{display:block;width:100%;margin-top:5px;padding:9px 10px;border:1px solid #c9d0d7;border-radius:8px;background:#fff;color:#1c2430;text-transform:none}.market-controls select:disabled{background:#dfe4e8;color:#67727d}
 @media(max-width:900px){.audience-switch{order:-1}.actions{align-items:center}}
 @media(max-width:650px){.audience-switch button{min-height:34px;padding:0 7px;font-size:7px}.market-controls{grid-template-columns:1fr 1fr}.market-controls label:last-child{grid-column:1/-1}.audience-card{padding:22px}.audience-card h2{font-size:28px}.audience-choices{grid-template-columns:1fr}.audience-choices button{padding:16px}}
+
+/* Installed-app state and feed freshness warning. */
+[hidden]{display:none!important}
+.feed-status{padding:10px 20px;background:#493315;color:#fff1d5;text-align:center;font-size:13px;font-weight:600}
