@@ -155,8 +155,103 @@ const tools={
  waiting:()=>`<div class="calc-grid"><div class="field"><label>Home price today</label><input id="wPrice" type="number" value="450000" step="5000"></div><div class="field"><label>Monthly rent</label><input id="wRent" type="number" value="2200" step="50"></div><div class="field"><label>Illustrative appreciation %</label><input id="wApp" type="number" value="4" step=".5"></div><div class="field"><label>Months waiting</label><input id="wMonths" type="number" value="12" step="1"></div><div class="result"><div><div class="eyebrow">If you wait</div><div class="mini-compare"><div class="mini-row"><span>Rent paid</span><b id="wRentPaid"></b></div><div class="mini-row"><span>Projected price increase</span><b id="wIncrease"></b></div><div class="mini-row"><span>Projected future home price</span><b id="wFuturePrice"></b></div><div class="mini-row"><span>Combined illustration</span><b id="wResult"></b></div></div></div><div class="result-note">Rent and projected appreciation are shown separately. Appreciation is hypothetical and this is not a complete rent-versus-buy analysis.</div></div></div>`,
  buydown:()=>`<div class="calc-grid"><div class="field"><label>Purchase price</label><input id="dyPrice" type="number" value="450000" step="5000"></div><div class="field"><label>Down payment %</label><input id="dyDown" type="number" value="3.5" step=".5"></div><div class="field"><label>Note rate %</label><input id="dyRate" type="number" value="6.75" step=".01"></div><div class="field"><label>Buydown structure</label><select id="dyType"><option value="21" selected>2-1 buydown</option><option value="321">3-2-1 buydown</option><option value="10">1-0 buydown</option></select></div><div class="result"><div id="dyOut"></div><div class="result-note">Temporary buydowns are commonly funded by seller or lender credit. Educational estimate only.</div></div></div>`
 };
-function openTool(name){document.querySelectorAll('.js-tool').forEach(b=>b.classList.toggle('active',b.dataset.tool===name));if(!$('toolDrawer'))return;$('toolDrawer').innerHTML=tools[name]();$('toolDrawer').classList.add('open');if(name==='payment'){const calc=()=>{const price=+$('pPrice').value,down=+$('pDown').value,loan=price*(1-down/100),mi=down<20?loan*.0055/12:0;$('pResult').textContent='['pPrice','pDown','pRate','pExtras'].forEach(id=>$(id).addEventListener('input',calc));calc()}if(name==='buying'){const calc=()=>{const income=+$('bIncome').value/12,debt=+$('bDebt').value,dti=+$('bDti').value,rate=+$('bRate').value,down=Math.min(99,Math.max(0,+$('bDown').value)),tax=+$('bTax').value/12,ins=+$('bIns').value/12,budget=Math.max(0,income*dti-debt);let lo=0,hi=3000000;for(let i=0;i<60;i++){const price=(lo+hi)/2,loan=price*(1-down/100),mi=down<20?loan*.0055/12:0,total=monthlyPI(price,down,rate)+tax+ins+mi;if(total<=budget)lo=price;else hi=price}$('bResult').textContent='if(name==='waiting'){const calc=()=>{const p=+$('wPrice').value,r=+$('wRent').value,a=+$('wApp').value/100,m=+$('wMonths').value,app=p*(Math.pow(1+a,m/12)-1),rent=r*m,future=p+app;$('wRentPaid').textContent='if(name==='buydown'){const calc=()=>{const price=+$('dyPrice').value,down=+$('dyDown').value,rate=+$('dyRate').value,type=$('dyType').value,steps=type==='321'?[3,2,1]:type==='10'?[1]:[2,1],full=monthlyPI(price,down,rate);let rows='',cost=0;steps.forEach((s,i)=>{const pay=monthlyPI(price,down,Math.max(rate-s,0)),sav=full-pay;cost+=sav*12;rows+=`<div class="mini-row"><span>Year ${i+1} · ${(rate-s).toFixed(3)}%</span><b>$${Math.round(pay).toLocaleString()}/mo · save $${Math.round(sav).toLocaleString()}</b></div>`});const sav1=full-monthlyPI(price,down,Math.max(rate-steps[0],0)),priceCut=full-monthlyPI(Math.max(price-cost,0),down,rate);$('dyOut').innerHTML=`<div class="mini-compare"><div class="mini-row"><span>Standard payment</span><b>$${Math.round(full).toLocaleString()}/mo</b></div>${rows}<div class="mini-row"><span><strong>Approx. seller concession</strong></span><b>$${Math.round(cost).toLocaleString()}</b></div></div><p style="font-size:11px;color:var(--muted)">The same seller dollars as a price reduction would lower payment roughly $${Math.round(priceCut).toLocaleString()}/mo versus about $${Math.round(sav1).toLocaleString()}/mo in year one from the buydown.</p>`};['dyPrice','dyDown','dyRate','dyType'].forEach(id=>$(id).addEventListener('input',calc));calc()}}
+function openTool(name) {
+  document.querySelectorAll('.js-tool').forEach((button) =>
+    button.classList.toggle('active', button.dataset.tool === name)
+  );
+  if (!$('toolDrawer')) return;
+  $('toolDrawer').innerHTML = tools[name]();
+  $('toolDrawer').classList.add('open');
 
+  if (name === 'payment') {
+    const calc = () => {
+      const price = +$('pPrice').value;
+      const down = +$('pDown').value;
+      const loan = price * (1 - down / 100);
+      const mi = down < 20 ? loan * .0055 / 12 : 0;
+      const result = monthlyPI(price, down, +$('pRate').value) + +$('pExtras').value + mi;
+      $('pResult').textContent = '$' + Math.round(result).toLocaleString() + '/mo';
+    };
+    ['pPrice', 'pDown', 'pRate', 'pExtras'].forEach((id) => $(id).addEventListener('input', calc));
+    calc();
+  }
+
+  if (name === 'buying') {
+    const calc = () => {
+      const income = +$('bIncome').value / 12;
+      const debt = +$('bDebt').value;
+      const dti = +$('bDti').value;
+      const rate = +$('bRate').value;
+      const down = Math.min(99, Math.max(0, +$('bDown').value));
+      const tax = +$('bTax').value / 12;
+      const insurance = +$('bIns').value / 12;
+      const budget = Math.max(0, income * dti - debt);
+      let low = 0;
+      let high = 3000000;
+      for (let i = 0; i < 60; i++) {
+        const price = (low + high) / 2;
+        const loan = price * (1 - down / 100);
+        const mi = down < 20 ? loan * .0055 / 12 : 0;
+        const total = monthlyPI(price, down, rate) + tax + insurance + mi;
+        if (total <= budget) low = price;
+        else high = price;
+      }
+      $('bResult').textContent = '$' + (Math.round(low / 1000) * 1000).toLocaleString();
+    };
+    ['bIncome', 'bDebt', 'bDti', 'bRate', 'bDown', 'bTax', 'bIns'].forEach((id) => $(id).addEventListener('input', calc));
+    calc();
+  }
+
+  if (name === 'waiting') {
+    const calc = () => {
+      const price = +$('wPrice').value;
+      const rentMonthly = +$('wRent').value;
+      const appreciation = +$('wApp').value / 100;
+      const months = +$('wMonths').value;
+      const priceIncrease = price * (Math.pow(1 + appreciation, months / 12) - 1);
+      const rentPaid = rentMonthly * months;
+      $('wRentPaid').textContent = '$' + Math.round(rentPaid).toLocaleString();
+      $('wIncrease').textContent = '$' + Math.round(priceIncrease).toLocaleString();
+      $('wFuturePrice').textContent = '$' + Math.round(price + priceIncrease).toLocaleString();
+      $('wResult').textContent = '$' + Math.round(priceIncrease + rentPaid).toLocaleString();
+    };
+    ['wPrice', 'wRent', 'wApp', 'wMonths'].forEach((id) => $(id).addEventListener('input', calc));
+    calc();
+  }
+
+  if (name === 'buydown') {
+    const calc = () => {
+      const price = +$('dyPrice').value;
+      const down = +$('dyDown').value;
+      const rate = +$('dyRate').value;
+      const type = $('dyType').value;
+      const steps = type === '321' ? [3, 2, 1] : type === '10' ? [1] : [2, 1];
+      const full = monthlyPI(price, down, rate);
+      let rows = '';
+      let cost = 0;
+      steps.forEach((step, index) => {
+        const payment = monthlyPI(price, down, Math.max(rate - step, 0));
+        const savings = full - payment;
+        cost += savings * 12;
+        rows += '<div class="mini-row"><span>Year ' + (index + 1) + ' · ' +
+          (rate - step).toFixed(3) + '%</span><b>$' + Math.round(payment).toLocaleString() +
+          '/mo · save $' + Math.round(savings).toLocaleString() + '</b></div>';
+      });
+      const firstYearSavings = full - monthlyPI(price, down, Math.max(rate - steps[0], 0));
+      const priceCutSavings = full - monthlyPI(Math.max(price - cost, 0), down, rate);
+      $('dyOut').innerHTML =
+        '<div class="mini-compare"><div class="mini-row"><span>Standard payment</span><b>$' +
+        Math.round(full).toLocaleString() + '/mo</b></div>' + rows +
+        '<div class="mini-row"><span><strong>Approx. seller concession</strong></span><b>$' +
+        Math.round(cost).toLocaleString() + '</b></div></div><p style="font-size:11px;color:var(--muted)">' +
+        'The same seller dollars as a price reduction would lower payment roughly $' +
+        Math.round(priceCutSavings).toLocaleString() + '/mo versus about $' +
+        Math.round(firstYearSavings).toLocaleString() + '/mo in year one from the buydown.</p>';
+    };
+    ['dyPrice', 'dyDown', 'dyRate', 'dyType'].forEach((id) => $(id).addEventListener('input', calc));
+    calc();
+  }
+}
 
 const AUDIENCE_COPY={
   agent:{
