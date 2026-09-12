@@ -1,13 +1,13 @@
 /* The Smith Report PWA shell. Live mortgage and market APIs are never cached here. */
 const CACHE_PREFIX = 'smith-report-';
-const CORE_CACHE = CACHE_PREFIX + 'core-v5';
+const CORE_CACHE = CACHE_PREFIX + 'core-v6';
 const IMAGE_CACHE = CACHE_PREFIX + 'images-v1';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
   '/assets/css/report.css?v=7',
-  '/assets/js/report.js?v=13',
+  '/assets/js/report.js?v=14',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
   '/assets/images/hero-denver.png',
