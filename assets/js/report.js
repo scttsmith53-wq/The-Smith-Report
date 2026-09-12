@@ -46,7 +46,108 @@ function progCard(label,value,change,cls){const pos=change&&String(change).charA
 function setPrograms(list){if($('programGrid'))$('programGrid').innerHTML=list.map(p=>progCard(p[0],p[1],p[2],p[4])).join('');}
 function setTicker(items){if(!$('tickerTrack')||!items.length)return;const nums=items.map(it=>`<span class="tick"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${it[2]?`<span class="${String(it[2]).charAt(0)==='-'?'down':'up'}">${esc(it[2])}</span>`:''}</span>`),out=[];QUOTES.forEach((q,i)=>{out.push(nums[i%nums.length]);out.push(`<span class="tick qtick">“${esc(q[0])}” <em>— ${esc(q[1])}</em></span>`)});const html=out.join('');$('tickerTrack').innerHTML=html+html;}
 function bootFallback(){setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);setPrograms([['CONFORMING','6.56%','+0.03'],['FHA','6.39%','+0.11'],['VA','6.20%','+0.03'],['USDA','6.39%','+0.09'],['JUMBO','6.63%','+0.09'],['DPA','~6.5%','','flat','dpa']]);}
-async function loadFeed(county='Denver',propertyType='single_family'){try{const url=FEED_BASE+'?county='+encodeURIComponent(county)+'&property_type='+encodeURIComponent(propertyType)+'&months=14';const r=await fetch(url),j=await r.json();if(!j||!j.ok)return;const rl={};(j.rates||[]).forEach(x=>rl[x.label]=x);const items=[];if(rl['30-yr fixed'])items.push(['30-YR FIXED',rl['30-yr fixed'].value,'']);if(rl['15-yr fixed'])items.push(['15-YR FIXED',rl['15-yr fixed'].value,'']);(j.stocks||[]).forEach(s=>items.push([s.symbol==='TNX'?'10-YR UST':s.symbol==='SPY'?'S&P 500':s.symbol==='ITB'?'HOMEBUILDERS':s.symbol,s.value,s.change]));if(items.length)setTicker(items);if(j.programRates?.length){const list=j.programRates.map(p=>[String(p.label).replace(' 30yr','').toUpperCase(),p.value,p.change,p.dir]);list.push(['DPA',j.dpa?.value||'Unavailable',j.dpa?.change||'',j.dpa?.dir||'flat','dpa']);setPrograms(list)}if(j.mortgage30?.history?.length){const hs=j.mortgage30.history.map(h=>h.rate).slice(-14);if(hs.length>1){DATA.rates=hs;rateChart()}}if(j.car){const key=propertyType==='townhome_condo'?'townhome_condo':'single_family',row=(j.car.counties||[]).find(x=>x.county===county)||j.car.denver_county,sf=row&&row[key],h=(j.car.history||[]).filter(x=>x[key]).slice(-14);if(sf&&h.length){const areaLabel=county+' '+(key==='single_family'?'SF':'Townhome/Condo');DATA.period=j.car.period_label||DATA.period;DATA.inventory=h.map(x=>x[key].homes_for_sale);DATA.sales=h.map(x=>x[key].closed_sales);DATA.periods=h.map(x=>{const [y,m]=String(x.period).split('-');return new Date(Number(y),Number(m)-1,1).toLocaleDateString('en-US',{month:'short',year:'2-digit'})});DATA.metrics[0]={label:areaLabel+' for sale',value:Number(sf.homes_for_sale).toLocaleString(),note:`${sf.homes_for_sale_yoy_pct>0?'+':''}${sf.homes_for_sale_yoy_pct}% YoY`,spark:DATA.inventory};DATA.metrics[1]={label:areaLabel+' closed sales',value:Number(sf.closed_sales).toLocaleString(),note:`${sf.closed_sales_yoy_pct>0?'+':''}${sf.closed_sales_yoy_pct}% YoY`,spark:DATA.sales};DATA.metrics[2]={label:areaLabel+' median price',value:'if($('newsList')&&j.news?.length)$('newsList').innerHTML=j.news.slice(0,6).map(nrow).join('');if($('celebList')&&j.celeb?.length)$('celebList').innerHTML=j.celeb.slice(0,5).map(nrow).join('');if($('vidGrid')&&j.videos?.length)$('vidGrid').innerHTML=j.videos.slice(0,6).map(v=>`<a class="card vid-card" href="${esc(v.link)}" target="_blank" rel="noopener"><div class="vid-thumb"><img src="${esc(v.thumbnail)}" alt="" loading="lazy"><span class="vid-play">▶</span></div><div class="vid-chan">${esc(v.channel)}</div><div class="vid-title">${esc(v.blurb)}</div><div class="vid-desc">${esc(v.title||'')}</div></a>`).join('')}}catch(e){}}
+async function loadFeed(county = 'Denver', propertyType = 'single_family') {
+  try {
+    const url = FEED_BASE + '?county=' + encodeURIComponent(county) +
+      '&property_type=' + encodeURIComponent(propertyType) + '&months=14';
+    const response = await fetch(url);
+    const data = await response.json();
+    if (!data || !data.ok) return;
+
+    const ratesByLabel = {};
+    (data.rates || []).forEach((rate) => { ratesByLabel[rate.label] = rate; });
+    const tickerItems = [];
+    if (ratesByLabel['30-yr fixed']) tickerItems.push(['30-YR FIXED', ratesByLabel['30-yr fixed'].value, '']);
+    if (ratesByLabel['15-yr fixed']) tickerItems.push(['15-YR FIXED', ratesByLabel['15-yr fixed'].value, '']);
+    (data.stocks || []).forEach((stock) => tickerItems.push([
+      stock.symbol === 'TNX' ? '10-YR UST' : stock.symbol === 'SPY' ? 'S&P 500' : stock.symbol === 'ITB' ? 'HOMEBUILDERS' : stock.symbol,
+      stock.value,
+      stock.change
+    ]));
+    if (tickerItems.length) setTicker(tickerItems);
+
+    if (data.programRates?.length) {
+      const programs = data.programRates.map((program) => [
+        String(program.label).replace(' 30yr', '').toUpperCase(),
+        program.value,
+        program.change,
+        program.dir
+      ]);
+      programs.push(['DPA', data.dpa?.value || 'Unavailable', data.dpa?.change || '', data.dpa?.dir || 'flat', 'dpa']);
+      setPrograms(programs);
+    }
+
+    if (data.mortgage30?.history?.length) {
+      const rateHistory = data.mortgage30.history.map((point) => point.rate).slice(-14);
+      if (rateHistory.length > 1) {
+        DATA.rates = rateHistory;
+        rateChart();
+      }
+    }
+
+    if (data.car) {
+      const key = propertyType === 'townhome_condo' ? 'townhome_condo' : 'single_family';
+      const countyRow = (data.car.counties || []).find((item) => item.county === county) || data.car.denver_county;
+      const current = countyRow && countyRow[key];
+      const history = (data.car.history || []).filter((item) => item[key]).slice(-14);
+      if (current && history.length) {
+        const typeLabel = key === 'single_family' ? 'SF' : 'Townhome/Condo';
+        const areaLabel = county + ' ' + typeLabel;
+        DATA.period = data.car.period_label || DATA.period;
+        DATA.inventory = history.map((item) => item[key].homes_for_sale);
+        DATA.sales = history.map((item) => item[key].closed_sales);
+        DATA.periods = history.map((item) => {
+          const parts = String(item.period).split('-');
+          return new Date(Number(parts[0]), Number(parts[1]) - 1, 1)
+            .toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        });
+        DATA.metrics[0] = {
+          label: areaLabel + ' for sale',
+          value: Number(current.homes_for_sale).toLocaleString(),
+          note: (current.homes_for_sale_yoy_pct > 0 ? '+' : '') + current.homes_for_sale_yoy_pct + '% YoY',
+          spark: DATA.inventory
+        };
+        DATA.metrics[1] = {
+          label: areaLabel + ' closed sales',
+          value: Number(current.closed_sales).toLocaleString(),
+          note: (current.closed_sales_yoy_pct > 0 ? '+' : '') + current.closed_sales_yoy_pct + '% YoY',
+          spark: DATA.sales
+        };
+        DATA.metrics[2] = {
+          label: areaLabel + ' median price',
+          value: '$' + Math.round(current.median_sale_price / 1000) + 'K',
+          note: (current.median_sale_price_yoy_pct > 0 ? '+' : '') + current.median_sale_price_yoy_pct + '% YoY',
+          spark: history.map((item) => item[key].median_sale_price)
+        };
+        if (ratesByLabel['30-yr fixed']) {
+          DATA.metrics[3] = { ...DATA.metrics[3], value: ratesByLabel['30-yr fixed'].value, note: 'live national average' };
+        }
+        if ($('period')) $('period').textContent = data.car.data_period_note || DATA.period;
+        if ($('marketSource')) {
+          $('marketSource').textContent = (data.car.attribution || 'Source: Colorado Association of REALTORS®.') +
+            ' Selected: ' + areaLabel + '.';
+        }
+        renderMetrics();
+        renderSnapshot();
+        inventoryChart();
+      }
+    }
+
+    if ($('newsList') && data.news?.length) $('newsList').innerHTML = data.news.slice(0, 6).map(nrow).join('');
+    if ($('celebList') && data.celeb?.length) $('celebList').innerHTML = data.celeb.slice(0, 5).map(nrow).join('');
+    if ($('vidGrid') && data.videos?.length) {
+      $('vidGrid').innerHTML = data.videos.slice(0, 6).map((video) =>
+        '<a class="card vid-card" href="' + esc(video.link) + '" target="_blank" rel="noopener">' +
+        '<div class="vid-thumb"><img src="' + esc(video.thumbnail) + '" alt="" loading="lazy"><span class="vid-play">▶</span></div>' +
+        '<div class="vid-chan">' + esc(video.channel) + '</div>' +
+        '<div class="vid-title">' + esc(video.blurb) + '</div>' +
+        '<div class="vid-desc">' + esc(video.title || '') + '</div></a>'
+      ).join('');
+    }
+  } catch (error) {
+    console.warn('Market feed unavailable; showing verified fallback data.', error);
+  }
+}
 
 const tools={
  payment:()=>`<div class="calc-grid"><div class="field"><label>Purchase price</label><input id="pPrice" type="number" value="450000" step="5000"></div><div class="field"><label>Down payment %</label><input id="pDown" type="number" value="3.5" step=".5"></div><div class="field"><label>Interest rate %</label><input id="pRate" type="number" value="6.75" step=".01"></div><div class="field"><label>Taxes + insurance + HOA / mo</label><input id="pExtras" type="number" value="425" step="25"></div><div class="result"><div><div class="eyebrow">Estimated full payment</div><div class="result-value" id="pResult"></div></div><div class="result-note">Includes an illustrative mortgage-insurance estimate. Actual taxes, insurance, HOA and mortgage insurance vary by property and loan program.</div></div></div>`,
