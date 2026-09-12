@@ -46,13 +46,25 @@ function progCard(label,value,change,cls){const pos=change&&String(change).charA
 function setPrograms(list){if($('programGrid'))$('programGrid').innerHTML=list.map(p=>progCard(p[0],p[1],p[2],p[4])).join('');}
 function setTicker(items){if(!$('tickerTrack')||!items.length)return;const nums=items.map(it=>`<span class="tick"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${it[2]?`<span class="${String(it[2]).charAt(0)==='-'?'down':'up'}">${esc(it[2])}</span>`:''}</span>`),out=[];QUOTES.forEach((q,i)=>{out.push(nums[i%nums.length]);out.push(`<span class="tick qtick">“${esc(q[0])}” <em>— ${esc(q[1])}</em></span>`)});const html=out.join('');$('tickerTrack').innerHTML=html+html;}
 function bootFallback(){setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);setPrograms([['CONFORMING','6.56%','+0.03'],['FHA','6.39%','+0.11'],['VA','6.20%','+0.03'],['USDA','6.39%','+0.09'],['JUMBO','6.63%','+0.09'],['DPA','~6.5%','','flat','dpa']]);}
-async function loadFeed(county = 'Denver', propertyType = 'single_family') {
+let marketRequest = 0;
+async function loadFeed(area = 'statewide', propertyType = 'single_family') {
+  const request = ++marketRequest;
   try {
-    const url = FEED_BASE + '?county=' + encodeURIComponent(county) +
+    const url = FEED_BASE + '?area=' + encodeURIComponent(area) +
       '&property_type=' + encodeURIComponent(propertyType) + '&months=14';
     const response = await fetch(url);
+    if (!response.ok) throw new Error('Market feed HTTP ' + response.status);
     const data = await response.json();
-    if (!data || !data.ok) return;
+    if (request !== marketRequest || !data || !data.ok) return;
+    if (Array.isArray(data.car?.areas) && data.car.areas.length) {
+      const selector = $('countySelect');
+      if (selector) {
+        const selected = data.car.focus?.id || area;
+        selector.innerHTML = data.car.areas.filter((item) => item.type === 'statewide' || item.type === 'county')
+          .map((item) => `<option value="${esc(item.id)}">${esc(item.label)}</option>`).join('');
+        selector.value = selected;
+      }
+    }
 
     const ratesByLabel = {};
     (data.rates || []).forEach((rate) => { ratesByLabel[rate.label] = rate; });
@@ -87,12 +99,18 @@ async function loadFeed(county = 'Denver', propertyType = 'single_family') {
 
     if (data.car) {
       const key = propertyType === 'townhome_condo' ? 'townhome_condo' : 'single_family';
-      const countyRow = (data.car.counties || []).find((item) => item.county === county) || data.car.denver_county;
-      const current = countyRow && countyRow[key];
+      const isStatewide = area === 'statewide';
+      const row = isStatewide ? data.car.statewide :
+        (data.car.counties || []).find((item) => item.county === area);
+      const current = row && row[key];
       const history = (data.car.history || []).filter((item) => item[key]).slice(-14);
       if (current && history.length) {
         const typeLabel = key === 'single_family' ? 'SF' : 'Townhome/Condo';
-        const areaLabel = county + ' ' + typeLabel;
+        const focusLabel = data.car.focus?.label || (isStatewide ? 'Colorado Statewide' : area + ' County');
+        const areaLabel = focusLabel + ' ' + typeLabel;
+        if ($('marketAtGlance')) $('marketAtGlance').textContent = focusLabel + ' at a glance';
+        if ($('marketChartArea')) $('marketChartArea').textContent = areaLabel + ' trend';
+        if ($('marketDateline')) $('marketDateline').textContent = focusLabel.toUpperCase();
         DATA.period = data.car.period_label || DATA.period;
         DATA.inventory = history.map((item) => item[key].homes_for_sale);
         DATA.sales = history.map((item) => item[key].closed_sales);
@@ -275,11 +293,11 @@ const AUDIENCE_COPY={
 };
 function setAudience(mode,persist=true){const audience=mode==='client'?'client':'agent',copy=AUDIENCE_COPY[audience];document.body.dataset.audience=audience;Object.entries(copy).forEach(([id,value])=>{const el=$(id);if(el)el.textContent=value});document.querySelectorAll('[data-set-audience]').forEach(b=>b.classList.toggle('active',b.dataset.setAudience===audience));if(persist)localStorage.setItem('smith_report_audience',audience);const chooser=$('audienceChooser');if(chooser){chooser.classList.remove('open');chooser.setAttribute('aria-hidden','true')}}
 function setupAudience(){const saved=localStorage.getItem('smith_report_audience');setAudience(saved||'agent',false);document.querySelectorAll('[data-set-audience]').forEach(b=>b.addEventListener('click',()=>setAudience(b.dataset.setAudience)));if(!saved){const chooser=$('audienceChooser');chooser?.classList.add('open');chooser?.setAttribute('aria-hidden','false')}}
-function setupMarketControls(){const county=$('countySelect'),type=$('propertyTypeSelect');if(!county||!type)return;county.innerHTML=CAR_COUNTIES.map(c=>`<option value="${esc(c)}"${c==='Denver'?' selected':''}>${esc(c)} County</option>`).join('');const refresh=()=>loadFeed(county.value,type.value);county.addEventListener('change',refresh);type.addEventListener('change',refresh)}
+function setupMarketControls(){const county=$('countySelect'),type=$('propertyTypeSelect');if(!county||!type)return;county.innerHTML='<option value="statewide">Colorado Statewide</option>'+CAR_COUNTIES.map(c=>`<option value="${esc(c)}">${esc(c)} County</option>`).join('');const refresh=()=>loadFeed(county.value,type.value);county.addEventListener('change',refresh);type.addEventListener('change',refresh)}
 
 function setupReferral(){const modal=$('refModal');if(!modal)return;const open=()=>{modal.classList.add('open');modal.setAttribute('aria-hidden','false');document.body.style.overflow='hidden'},close=()=>{modal.classList.remove('open');modal.setAttribute('aria-hidden','true');document.body.style.overflow=''};document.querySelectorAll('.js-ref').forEach(b=>b.addEventListener('click',open));$('closeRef').onclick=$('cancelRef').onclick=close;modal.addEventListener('click',e=>{if(e.target===modal)close()});document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});$('refForm').addEventListener('submit',async e=>{e.preventDefault();const btn=$('sendRef');btn.disabled=true;btn.textContent='Sending…';const payload={client:{first_name:$('clientFirst').value.trim(),last_name:$('clientLast').value.trim(),phone:$('clientPhone').value.trim(),email:$('clientEmail').value.trim(),loan_purpose:$('clientPurpose').value,timeline:$('clientTimeline').value,notes:$('refNotes').value.trim(),consent:true},referrer:{name:$('agentName').value.trim(),brokerage:$('agentBrokerage').value.trim(),phone:$('agentPhone').value.trim(),email:$('agentEmail').value.trim()},source:'the_smith_report_referral',event_source_url:location.href};try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-referral',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});if(!r.ok)throw Error();$('refForm').style.display='none';$('refSuccess').style.display='block';if(window.fbq)fbq('trackCustom','AgentClientReferral',{content_name:'The Smith Report'})}catch(err){alert('The referral could not be submitted. Please call or text Scott at 720-252-7037.');btn.disabled=false;btn.textContent='Send Referral'}})}
 function setupOptin(){if(!$('optinForm'))return;$('optinForm').addEventListener('submit',async e=>{e.preventDefault();if(!$('consent').checked)return;const btn=$('submitBtn');btn.disabled=true;btn.textContent='Adding you…';const evtId='lead.'+Date.now()+'.'+Math.random().toString(36).slice(2,10);try{const r=await fetch('https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-optin',{method:'POST',headers:{'Content-Type':'application/json','apikey':'sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv','Authorization':'Bearer sb_publishable_YnBBmClE9jpZMKN-OMuFWA_NB3oGOMv'},body:JSON.stringify({first_name:$('first').value.trim(),last_name:$('last').value.trim(),full_name:$('first').value.trim()+' '+$('last').value.trim(),phone:$('phone').value.trim(),email:$('email').value.trim(),brokerage:$('brokerage').value.trim(),source:'the_smith_report',consent:true,event_id:evtId,event_source_url:location.href})});if(!r.ok)throw Error();if(window.fbq)fbq('track','Lead',{content_name:'The Smith Report — Weekly Brief'},{eventID:evtId});$('optinForm').style.display='none';$('optinSuccess').style.display='block'}catch(err){alert('Something went wrong. Please text Scott directly to be added.');btn.disabled=false;btn.textContent='Get Scott’s Brief'}})}
 function setupChat(){const chat=$('srChat'),body=$('srBody'),input=$('srInput');if(!chat)return;let msgs=[],opened=false;const add=(role,t)=>{const d=document.createElement('div');d.className='sr-msg '+(role==='user'?'me':'bot');d.textContent=t;body.appendChild(d);body.scrollTop=body.scrollHeight;return d},open=()=>{chat.classList.add('open');if(!opened){opened=true;add('bot',"Hey — I'm Scott's AI desk. Ask me about rates, down payment assistance, or a buyer scenario and I'll give you a straight answer.")}input.focus()},close=()=>chat.classList.remove('open');$('srFab').addEventListener('click',()=>chat.classList.contains('open')?close():open());$('srClose').addEventListener('click',close);async function send(){const t=input.value.trim();if(!t)return;input.value='';add('user',t);msgs.push({role:'user',content:t});const ty=add('bot','…');ty.classList.add('typing');try{const r=await fetch(CHAT,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({source:'the_smith_report',messages:msgs.slice(-12)})}),j=await r.json();ty.remove();const rep=j?.reply||"I couldn't reach my desk just then — text Scott directly and he'll jump in.";add('bot',rep);msgs.push({role:'assistant',content:rep})}catch(e){ty.remove();add('bot','Connection hiccup — try again in a moment.')}}$('srSend').addEventListener('click',send);input.addEventListener('keydown',e=>{if(e.key==='Enter')send()})}
 function setupReveal(){const observer=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');observer.unobserve(x.target)}}),{threshold:.06});document.querySelectorAll('.reveal,.section').forEach(el=>{el.classList.add('reveal');observer.observe(el)})}
-function boot(){setupAudience();setupMarketControls();setDate();renderMetrics();renderSnapshot();inventoryChart();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed()}
+function boot(){setupAudience();setupMarketControls();setDate();renderMetrics();renderSnapshot();inventoryChart();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed('statewide',$('propertyTypeSelect')?.value||'single_family')}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot):boot();
