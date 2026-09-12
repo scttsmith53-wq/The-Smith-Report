@@ -22,7 +22,7 @@
 </script>
 </head>
 <body data-audience="agent">
-<div class="utility"><div class="wrap"><div id="utilityAudience">Denver Metro · Mortgage & Housing Intelligence</div><div>Presented by Scott Smith · Citywide Home Mortgage</div><div class="live"><span class="dot"></span>Live briefing</div></div></div>
+<div class="utility"><div class="wrap"><div id="utilityAudience">Colorado · Mortgage & Housing Intelligence</div><div>Presented by Scott Smith · Citywide Home Mortgage</div><div class="live"><span class="dot"></span>Live briefing</div></div></div>
 <header class="masthead">
   <div class="wrap mast-grid">
     <div class="edition"><span id="editionTop">Monday Edition</span><br><span id="updatedTop">Updated today</span></div>
@@ -37,11 +37,10 @@
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
 <main>
 <section id="lead"><div class="wrap">
-  <div class="dateline"><span>DENVER, COLORADO</span><span>Market period: <b id="period">June 2026</b> · CAR and live market feeds</span></div><div class="dateline" id="marketSource">Source: Colorado Association of REALTORS®. MLS data; excludes FSBO and some new construction.</div>
+  <div class="dateline"><span id="marketDateline">COLORADO STATEWIDE</span><span>Market period: <b id="period">June 2026</b> · CAR and live market feeds</span></div><div class="dateline" id="marketSource">Source: Colorado Association of REALTORS®. MLS data; excludes FSBO and some new construction.</div>
   <div class="market-controls card">
-    <label>County<select id="countySelect"></select></label>
+    <label>Market area<select id="countySelect"><option value="statewide">Colorado Statewide</option></select></label>
     <label>Property type<select id="propertyTypeSelect"><option value="single_family">Single-family</option><option value="townhome_condo">Townhome / Condo</option></select></label>
-    <label>City / local area<select id="areaSelect" disabled><option>Available when local-area feed is added</option></select></label>
   </div>
   <div class="hero reveal">
     <article class="card lead">
@@ -54,14 +53,14 @@
         <div class="bottom-line"><div class="eyebrow" id="takeawayLabel">What it means for agents</div><p id="takeawayText">More homes are available, sellers are more flexible and condition matters again. The opportunity belongs to agents who convert leverage into a monthly payment the buyer can accept.</p></div>
       </div>
     </article>
-    <aside class="card data-rail"><h2 class="rail-title">Denver at a glance</h2><div class="metric-grid" id="metrics"></div><div class="quote"><div class="quote-text">“Condition has quietly become the currency that matters most.”</div><div class="quote-by">— Amanda Snitker, DMAR Market Trends Committee</div></div></aside>
+    <aside class="card data-rail"><h2 class="rail-title" id="marketAtGlance">Colorado Statewide at a glance</h2><div class="metric-grid" id="metrics"></div><div class="quote"><div class="quote-text">“Condition has quietly become the currency that matters most.”</div><div class="quote-by">— Amanda Snitker, DMAR Market Trends Committee</div></div></aside>
   </div>
 </div></section>
 
 <section class="section compact" id="snapshot"><div class="wrap"><div class="section-head"><div><div class="eyebrow">10-second read</div><h2 class="section-title">The market in four numbers.</h2></div><div class="section-desc">Use this as the quick conversation starter before you dive into charts, rates or strategy.</div></div><div class="snapshot" id="snapshotGrid"></div></div></section>
 
 <section class="section dashboard" id="dashboard"><div class="wrap"><div class="section-head"><div><div class="eyebrow">Market dashboard</div><h2 class="section-title">What changed—and why it matters.</h2></div><div class="section-desc">Inventory, mortgage rates and payment impact in one place for buyer conversations.</div></div><div class="dash-grid">
-  <article class="card dash-card"><div class="eyebrow">Denver County single-family trend</div><h3>Supply and sales activity.</h3><div class="dash-note">Monthly homes for sale compared with closed sales from the CAR feed.</div><div class="chart" id="inventoryChart"></div></article>
+  <article class="card dash-card"><div class="eyebrow" id="marketChartArea">Colorado Statewide SF trend</div><h3>Supply and sales activity.</h3><div class="dash-note">Monthly homes for sale compared with closed sales from the CAR feed.</div><div class="chart" id="inventoryChart"></div></article>
   <article class="card dash-card"><div class="eyebrow">30-year fixed trend</div><h3>Payment pressure remains.</h3><div class="dash-note">Even modest rate changes still materially affect buyer comfort.</div><div class="chart" id="rateChart"></div></article>
   <article class="card dash-card"><div class="eyebrow">Payment on $500,000</div><h3>Small rate moves, large monthly impact.</h3><div class="dash-note">Principal and interest only; taxes and insurance not included.</div><div class="payment-list" id="paymentList"></div></article>
 </div></div></section>
@@ -122,6 +121,6 @@
 
 <button class="sr-fab" id="srFab" aria-label="Ask Scott's AI desk">✦</button>
 <div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
-<script src="assets/js/report.js?v=8" defer></script>
+<script src="assets/js/report.js?v=9" defer></script>
 </body>
 </html>
