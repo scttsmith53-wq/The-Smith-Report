@@ -1,13 +1,13 @@
 /* The Smith Report PWA shell. Live mortgage and market APIs are never cached here. */
 const CACHE_PREFIX = 'smith-report-';
-const CORE_CACHE = CACHE_PREFIX + 'core-v6';
+const CORE_CACHE = CACHE_PREFIX + 'core-v7';
 const IMAGE_CACHE = CACHE_PREFIX + 'images-v1';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/assets/css/report.css?v=7',
-  '/assets/js/report.js?v=14',
+  '/assets/css/report.css?v=8',
+  '/assets/js/report.js?v=15',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
   '/assets/images/hero-denver.png',
@@ -35,7 +35,7 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
 
   if (request.mode === 'navigate') {
-    event.respondWith(fetch(request).then((response) => {
+    event.respondWith(fetch(request, { cache: 'no-store' }).then((response) => {
       if (response.ok) {
         const copy = response.clone();
         event.waitUntil(caches.open(CORE_CACHE).then((cache) => cache.put('/', copy)));
@@ -48,7 +48,7 @@ self.addEventListener('fetch', (event) => {
 
   // Scripts and styles update online; the last working copy remains available offline.
   if (url.pathname.endsWith('.js') || url.pathname.endsWith('.css')) {
-    event.respondWith(fetch(request).then((response) => {
+    event.respondWith(fetch(request, { cache: 'no-store' }).then((response) => {
       if (response.ok) {
         const copy = response.clone();
         event.waitUntil(caches.open(CORE_CACHE).then((cache) => cache.put(request, copy)));
@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
 
   // Icons and editorial images can be served immediately from the app cache.
   if (/\.(?:png|jpg|jpeg|webp|svg)$/i.test(url.pathname)) {
-    event.respondWith(caches.match(request).then((cached) => cached || fetch(request).then((response) => {
+    event.respondWith(caches.match(request).then((cached) => cached || fetch(request, { cache: 'no-store' }).then((response) => {
       if (response.ok) {
         const copy = response.clone();
         event.waitUntil(caches.open(IMAGE_CACHE).then((cache) => cache.put(request, copy)));
