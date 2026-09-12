@@ -319,7 +319,7 @@ function setupPWA(){
   const ios=/iPad|iPhone|iPod/.test(navigator.userAgent) ||
     (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   const dismissedUntil=Number(localStorage.getItem('smith-report-install-dismissed-until')||0);
-  let installPrompt=null;
+  let installPrompt=window.smithReportInstallPrompt||null;
   const showCard=(force=false)=>{
     if(!standalone&&mobile&&card&&(force||Date.now()>dismissedUntil))card.hidden=false;
   };
@@ -345,6 +345,7 @@ function setupPWA(){
     if(!ios&&installPrompt){
       const prompt=installPrompt;
       installPrompt=null;
+      window.smithReportInstallPrompt=null;
       if(action)action.disabled=true;
       try{
         await prompt.prompt();
@@ -367,15 +368,15 @@ function setupPWA(){
     if(card)card.hidden=true;
     localStorage.setItem('smith-report-install-dismissed-until',String(Date.now()+14*86400000));
   });
-  window.addEventListener('beforeinstallprompt',event=>{
-    event.preventDefault();
-    installPrompt=event;
+  window.addEventListener('smith-report-install-ready',()=>{
+    installPrompt=window.smithReportInstallPrompt;
     if(steps)steps.hidden=true;
     updateCard();
     showCard();
   });
   window.addEventListener('appinstalled',()=>{
     installPrompt=null;
+    window.smithReportInstallPrompt=null;
     if(card)card.hidden=true;
   });
   updateCard();
