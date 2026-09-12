@@ -19,7 +19,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/report.css?v=5">
+<link rel="stylesheet" href="assets/css/report.css?v=6">
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','879134155809312');fbq('track','PageView');
 </script>
@@ -36,6 +36,14 @@
     <div class="actions"><button class="btn" id="installApp" type="button" hidden>Install app</button><div class="audience-switch" aria-label="Report audience"><button type="button" data-set-audience="client">Public</button><button type="button" data-set-audience="agent">Realtor</button></div><button class="btn js-ref agent-only" type="button">Refer a Client</button><a class="btn primary" href="https://apply.citywidehm.com/?emp-id=39881&emp_id=39881&gr_company=cit&langPref=en&loId=39881&loan-purpose=purchase&loid=39881" target="_blank" rel="noopener">Client Application</a></div>
   </div>
 </header>
+<aside id="installCard" class="install-card" aria-label="Install The Smith Report" hidden>
+  <button class="install-close" id="installDismiss" type="button" aria-label="Dismiss install tip">×</button>
+  <div class="install-eyebrow">The Smith Report app</div>
+  <h2>Keep the report one tap away.</h2>
+  <p id="installDescription">Add it to your home screen for quick access to rates, market stats and buyer tools.</p>
+  <div id="installSteps" class="install-steps" hidden></div>
+  <button class="btn primary install-action" id="installCardAction" type="button">Install app</button>
+</aside>
 <div id="feedStatus" class="feed-status" role="status" hidden></div>
 <nav class="nav"><div class="wrap"><a href="#lead">Lead Story</a><a href="#snapshot">Snapshot</a><a href="#dashboard">Dashboard</a><a href="#programs">Rates</a><a href="#plays">Financing Plays</a><a href="#news">News</a><a href="#tools">Agent Tools</a><a href="#partner">Financing Desk</a><button class="js-ref agent-only" type="button">Refer a Client</button></div></nav>
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
@@ -125,6 +133,6 @@
 
 <button class="sr-fab" id="srFab" aria-label="Ask Scott's AI desk">✦</button>
 <div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
-<script src="assets/js/report.js?v=11" defer></script>
+<script src="assets/js/report.js?v=12" defer></script>
 </body>
 </html>
