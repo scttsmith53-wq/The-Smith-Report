@@ -110,3 +110,11 @@ body[data-audience="client"] .public-only{display:block}
 .app-update{position:fixed;z-index:140;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);width:min(460px,calc(100% - 24px));padding:12px 14px;border:1px solid var(--gold);border-radius:12px;background:#10243f;color:#fff;box-shadow:0 12px 35px rgba(0,0,0,.4);font:600 13px/1.4 Inter,sans-serif;text-align:center}
 .app-update button{margin-left:9px;border:0;background:transparent;color:var(--gold-soft);font:800 13px Inter,sans-serif;cursor:pointer}
 .app-update button:last-child{font-size:19px;vertical-align:middle}
+
+/* Keep the application QR large enough to scan at arm's length. */
+.qr-panel{grid-template-columns:160px minmax(0,1fr);gap:18px;padding:16px}
+.qr-panel img{display:block;width:160px;height:160px;object-fit:contain;padding:7px;border-radius:8px;background:#fff}
+@media(max-width:650px){
+  .qr-panel{grid-template-columns:1fr;justify-items:center;gap:12px;padding:18px;text-align:center}
+  .qr-panel img{width:192px;height:192px;max-width:100%}
+}
