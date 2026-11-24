@@ -71,6 +71,10 @@ footer{padding:25px 0 36px;background:#030812;color:#9eabb7;font-size:9px;line-h
 .audience-choices{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:22px}.audience-choices button{padding:20px;border:1px solid var(--line-strong);border-radius:14px;background:var(--panel-2);color:#fff;text-align:left;cursor:pointer}.audience-choices button:hover{border-color:var(--gold);transform:translateY(-1px)}.audience-choices strong{display:block;font:700 19px "Playfair Display",Georgia,serif}.audience-choices span{display:block;margin-top:6px;color:var(--muted);font-size:10px;line-height:1.5}
 body[data-audience="client"] .agent-only{display:none!important}
 .market-controls{display:grid;grid-template-columns:1fr 1fr 1.2fr;gap:10px;margin:14px 0 0;padding:13px 15px;box-shadow:none}.market-controls label{color:var(--muted);font:800 8px Manrope,Inter,sans-serif;letter-spacing:.08em;text-transform:uppercase}.market-controls select{display:block;width:100%;margin-top:5px;padding:9px 10px;border:1px solid #c9d0d7;border-radius:8px;background:#fff;color:#1c2430;text-transform:none}.market-controls select:disabled{background:#dfe4e8;color:#67727d}
+.market-freshness{display:block;margin:0;padding:8px 0 10px;color:#e7c27a;font-size:13px;line-height:1.45;letter-spacing:0;text-transform:none;border-bottom:1px solid var(--line)}
+.market-stale{grid-column:1/-1;padding:14px 16px;border:1px solid var(--line);border-radius:11px;background:rgba(255,255,255,.025);color:#d7dfe6;font-size:14px;line-height:1.5}
+.as-of{color:var(--muted);font-size:8px;letter-spacing:.04em;text-transform:uppercase}
+.metric-foot .as-of{display:block;margin-top:3px}
 @media(max-width:900px){.audience-switch{order:-1}.actions{align-items:center}}
 @media(max-width:650px){.audience-switch button{min-height:34px;padding:0 7px;font-size:7px}.market-controls{grid-template-columns:1fr 1fr}.market-controls label:last-child{grid-column:1/-1}.audience-card{padding:22px}.audience-card h2{font-size:28px}.audience-choices{grid-template-columns:1fr}.audience-choices button{padding:16px}}
 

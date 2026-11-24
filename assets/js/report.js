@@ -1,6 +1,7 @@
 const $=id=>document.getElementById(id);
+const SAVED_FIGURES_AS_OF='June 2026';
 const DATA={
-  period:'June 2026',
+  figureAsOf:'',
   metrics:[
     {label:'Active listings',value:'12,744',note:'near a decade high',spark:[7600,8400,9300,10800,11900,12744]},
     {label:'Months of supply',value:'3.25',note:'tilting to buyers',spark:[1.8,2.0,2.3,2.6,3.0,3.25]},
@@ -33,11 +34,11 @@ const CHAT='https://qfhfuesnjfuwfujhvgpa.supabase.co/functions/v1/agent-chat';
 
 function esc(s){return String(s==null?'':s).replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));}
 function monthlyPI(price,down,rate,term=30){const loan=price*(1-down/100),r=rate/1200,n=term*12;return r?loan*r*Math.pow(1+r,n)/(Math.pow(1+r,n)-1):loan/n;}
-function setDate(){const now=new Date();if($('updatedTop'))$('updatedTop').textContent='Checking live feeds…';if($('editionTop'))$('editionTop').textContent=now.toLocaleDateString('en-US',{weekday:'long'})+' Edition';if($('period'))$('period').textContent=DATA.period;}
+function setDate(){const now=new Date();if($('updatedTop'))$('updatedTop').textContent='Checking live feeds…';if($('editionTop'))$('editionTop').textContent=now.toLocaleDateString('en-US',{weekday:'long'})+' Edition';}
 function spark(a){const w=78,h=21,min=Math.min(...a),max=Math.max(...a),r=max-min||1,pts=a.map((v,i)=>`${2+i*(w-4)/(a.length-1)},${h-3-(v-min)/r*(h-6)}`).join(' '),last=pts.split(' ').at(-1).split(',');return `<svg class="spark" viewBox="0 0 ${w} ${h}"><polyline points="${pts}" fill="none" stroke="#e9c176" stroke-width="2"/><circle cx="${last[0]}" cy="${last[1]}" r="2.3" fill="#e8a33d"/></svg>`;}
-function renderMetrics(){if(!$('metrics'))return;$('metrics').innerHTML=DATA.metrics.map(m=>`<div class="metric"><div class="metric-head"><div class="metric-label">${m.label}</div><div class="metric-value">${m.value}</div></div><div class="metric-foot"><span>${m.note}</span>${spark(m.spark)}</div></div>`).join('');}
-function renderSnapshot(){if(!$('snapshotGrid'))return;$('snapshotGrid').innerHTML=DATA.metrics.map(m=>`<div class="card snapshot-card"><div class="snapshot-label">${m.label}</div><div class="snapshot-value">${m.value}</div><div class="snapshot-note">${m.note}</div></div>`).join('');}
-function inventoryChart(){if(!$('inventoryChart'))return;const w=620,h=300,m={l:38,r:28,t:14,b:30},iw=w-m.l-m.r,ih=h-m.t-m.b,invMax=Math.max(...DATA.inventory)*1.12,salesMax=Math.max(...DATA.sales)*1.18,step=iw/DATA.inventory.length;let bars='',linePts=[];DATA.inventory.forEach((v,i)=>{const x=m.l+i*step+step*.18,bw=step*.48,bh=v/invMax*ih,y=m.t+ih-bh,label=DATA.periods[i]||'';bars+=`<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${bh}"/><text class="axis" x="${x+bw/2}" y="${h-8}" text-anchor="middle">${esc(label)}</text>`;linePts.push([m.l+i*step+step*.42,m.t+ih-DATA.sales[i]/salesMax*ih])});const grid=[0,1,2,3,4].map(i=>`<line class="gridline" x1="${m.l}" y1="${m.t+i*ih/4}" x2="${w-m.r}" y2="${m.t+i*ih/4}"/>`).join('');const path='M'+linePts.map(p=>p.join(',')).join(' L');$('inventoryChart').innerHTML=`<div class="dash-note" style="margin-bottom:8px">Bars: homes for sale · Gold line: closed sales</div><svg viewBox="0 0 ${w} ${h}" aria-label="Denver County single-family homes for sale and closed sales">${grid}${bars}<path class="line-red" d="${path}"/>${linePts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#e8a33d"/>`).join('')}</svg>`;}
+function renderMetrics(){if(!$('metrics'))return;$('metrics').innerHTML=DATA.metrics.map(m=>`<div class="metric"><div class="metric-head"><div class="metric-label">${m.label}</div><div class="metric-value">${m.value}</div></div><div class="metric-foot"><span>${m.note}</span>${m.asOf?`<span class="as-of">${esc(m.asOf)}</span>`:''}${spark(m.spark)}</div></div>`).join('');}
+function renderSnapshot(){if(!$('snapshotGrid'))return;$('snapshotGrid').innerHTML=DATA.metrics.map(m=>`<div class="card snapshot-card"><div class="snapshot-label">${m.label}</div><div class="snapshot-value">${m.value}</div><div class="snapshot-note">${m.note}${m.asOf?` · <span class="as-of">${esc(m.asOf)}</span>`:''}</div></div>`).join('');}
+function inventoryChart(){if(!$('inventoryChart'))return;const w=620,h=300,m={l:38,r:28,t:14,b:30},iw=w-m.l-m.r,ih=h-m.t-m.b,invMax=Math.max(...DATA.inventory)*1.12,salesMax=Math.max(...DATA.sales)*1.18,step=iw/DATA.inventory.length;let bars='',linePts=[];DATA.inventory.forEach((v,i)=>{const x=m.l+i*step+step*.18,bw=step*.48,bh=v/invMax*ih,y=m.t+ih-bh,label=DATA.periods[i]||'';bars+=`<rect class="bar" x="${x}" y="${y}" width="${bw}" height="${bh}"/><text class="axis" x="${x+bw/2}" y="${h-8}" text-anchor="middle">${esc(label)}</text>`;linePts.push([m.l+i*step+step*.42,m.t+ih-DATA.sales[i]/salesMax*ih])});const grid=[0,1,2,3,4].map(i=>`<line class="gridline" x1="${m.l}" y1="${m.t+i*ih/4}" x2="${w-m.r}" y2="${m.t+i*ih/4}"/>`).join('');const path='M'+linePts.map(p=>p.join(',')).join(' L');const asOf=DATA.figureAsOf?`<div class="dash-note as-of">As of ${esc(DATA.figureAsOf)}. Not the current market period.</div>`:'';$('inventoryChart').innerHTML=`${asOf}<div class="dash-note" style="margin-bottom:8px">Bars: homes for sale · Gold line: closed sales</div><svg viewBox="0 0 ${w} ${h}" aria-label="Homes for sale and closed sales">${grid}${bars}<path class="line-red" d="${path}"/>${linePts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="#e8a33d"/>`).join('')}</svg>`;}
 function rateChart(){if(!$('rateChart'))return;const w=620,h=300,m={l:42,r:20,t:18,b:30},iw=w-m.l-m.r,ih=h-m.t-m.b,min=Math.min(...DATA.rates)-.03,max=Math.max(...DATA.rates)+.03,pts=DATA.rates.map((v,i)=>[m.l+i*iw/(DATA.rates.length-1),m.t+ih-(v-min)/(max-min)*ih]);const grid=[0,1,2,3].map(i=>`<line class="gridline" x1="${m.l}" y1="${m.t+i*ih/3}" x2="${w-m.r}" y2="${m.t+i*ih/3}"/>`).join('');const path='M'+pts.map(p=>p.join(',')).join(' L');const area=`M${m.l},${m.t+ih} L${pts.map(p=>p.join(',')).join(' L')} L${pts.at(-1)[0]},${m.t+ih} Z`;$('rateChart').innerHTML=`<svg viewBox="0 0 ${w} ${h}" aria-label="30-year fixed mortgage rate trend">${grid}<path class="area" d="${area}"/><path class="line-gold" d="${path}"/>${pts.map((p,i)=>`<circle cx="${p[0]}" cy="${p[1]}" r="${i===pts.length-1?4.5:2.7}" fill="${i===pts.length-1?'#e8a33d':'#e9c176'}"/>`).join('')}</svg>`;}
 function paymentBars(){if(!$('paymentList'))return;const max=Math.max(...DATA.payments.map(x=>x[1]));$('paymentList').innerHTML=DATA.payments.map(p=>`<div class="payment-row"><span>${p[0]}</span><div class="payment-track"><div class="payment-fill" style="width:${p[1]/max*100}%"></div></div><span class="payment-value">$${p[1].toLocaleString()}</span></div>`).join('');}
 function nrow(n){let host='';try{host=new URL(n.link||n.url).hostname.replace(/^www\./,'')}catch(e){}const link=n.link||n.url||'#',title=n.headline||n.title||'',source=n.source||host,thumb=n.image?`<img class="news-thumb" src="${esc(n.image)}" alt="" loading="lazy">`:(host?`<img class="news-logo" src="https://www.google.com/s2/favicons?sz=64&domain=${host}" alt="" loading="lazy">`:'');return `<a class="news-row" href="${esc(link)}" target="_blank" rel="noopener"><span class="news-source">${thumb}<span>${esc(source)}</span></span><span class="news-title">${esc(title)}</span><span class="news-arrow">›</span></a>`;}
@@ -47,6 +48,124 @@ function setPrograms(list){if($('programGrid'))$('programGrid').innerHTML=list.m
 function setTicker(items){if(!$('tickerTrack')||!items.length)return;const nums=items.map(it=>`<span class="tick"><b>${esc(it[0])}</b><span>${esc(it[1])}</span>${it[2]?`<span class="${String(it[2]).charAt(0)==='-'?'down':'up'}">${esc(it[2])}</span>`:''}</span>`),out=[];QUOTES.forEach((q,i)=>{out.push(nums[i%nums.length]);out.push(`<span class="tick qtick">“${esc(q[0])}” <em>— ${esc(q[1])}</em></span>`)});const html=out.join('');$('tickerTrack').innerHTML=html+html;}
 function bootFallback(){setTicker([['30-YR FIXED','6.55%',''],['15-YR FIXED','5.93%',''],['10-YR UST','4.54%','-0.03'],['S&P 500','743.29','-0.99%'],['HOMEBUILDERS','97.33','-2.85%']]);setPrograms([['CONFORMING','6.56%','+0.03'],['FHA','6.39%','+0.11'],['VA','6.20%','+0.03'],['USDA','6.39%','+0.09'],['JUMBO','6.63%','+0.09'],['DPA','~6.875%','','flat','dpa']]);}
 let marketRequest = 0;
+let shownMarketArea = '';
+
+function periodKey(value) {
+  const text = String(value == null ? '' : value);
+  const iso = text.match(/(\d{4})-(\d{2})/);
+  if (iso) return iso[1] + '-' + iso[2];
+  const named = text.match(/\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})\b/i);
+  if (!named) return '';
+  const months = {
+    january: '01', february: '02', march: '03', april: '04', may: '05', june: '06',
+    july: '07', august: '08', september: '09', october: '10', november: '11', december: '12'
+  };
+  return named[2] + '-' + months[named[1].toLowerCase()];
+}
+
+function formatPeriod(key) {
+  if (!key) return '';
+  const parts = key.split('-');
+  return new Date(Number(parts[0]), Number(parts[1]) - 1, 1)
+    .toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+}
+
+function newestPeriod(car) {
+  const found = [];
+  const add = (value) => {
+    const key = periodKey(value);
+    if (key) found.push(key);
+  };
+  add(car.latest_period);
+  add(car.statewide && car.statewide.period);
+  (car.statewide_history || []).forEach((item) => add(item.period));
+  (car.history || []).forEach((item) => add(item.period));
+  (car.county_history || []).forEach((item) => add(item.period));
+  (car.counties || []).forEach((item) => {
+    add(item.period);
+    if (item.single_family) add(item.single_family.period);
+    if (item.townhome_condo) add(item.townhome_condo.period);
+  });
+  found.sort();
+  return found.length ? found[found.length - 1] : '';
+}
+
+function areaView(car, area, key) {
+  const isStatewide = area === 'statewide';
+  const row = isStatewide ? car.statewide : (car.counties || []).find((item) => item.county === area);
+  const source = isStatewide ? (car.statewide_history || car.history || []) : (car.history || car.county_history || []);
+  const history = source.filter((item) => item && item[key]);
+  const periods = [];
+  history.forEach((item) => {
+    const stamp = periodKey(item.period || item.period_label);
+    if (stamp) periods.push(stamp);
+  });
+  if (row) {
+    const stamp = periodKey(row.period || row.period_label || (row[key] && row[key].period));
+    if (stamp) periods.push(stamp);
+  }
+  periods.sort();
+  return {
+    isStatewide,
+    row,
+    history,
+    metrics: (row && row[key]) || (history.length ? history[history.length - 1][key] : null),
+    seriesPeriod: periods.length ? periods[periods.length - 1] : ''
+  };
+}
+
+function staleMessage(isStatewide, sinceLabel, currentLabel) {
+  const place = isStatewide ? 'the statewide report' : 'this county';
+  if (sinceLabel) return 'No new data for ' + place + ' since ' + sinceLabel + '.';
+  return 'No new data for ' + place + ' for ' + (currentLabel || 'the current market period') + '.';
+}
+
+function marketStatus(car, area, key) {
+  const view = areaView(car, area, key);
+  const currentPeriod = newestPeriod(car);
+  const currentLabel = formatPeriod(currentPeriod);
+  const sinceLabel = formatPeriod(view.seriesPeriod);
+  const stale = view.isStatewide
+    ? (!view.metrics || (view.seriesPeriod && currentPeriod && view.seriesPeriod < currentPeriod))
+    : (!view.row || !view.metrics || (view.seriesPeriod && currentPeriod && view.seriesPeriod < currentPeriod));
+  return { stale, currentLabel, sinceLabel, message: staleMessage(view.isStatewide, sinceLabel, currentLabel), view };
+}
+
+function setFreshness(message) {
+  const el = $('marketFreshness');
+  if (!el) return;
+  el.hidden = !message;
+  el.textContent = message || '';
+}
+
+function fillMarketNote(message) {
+  const block = '<div class="market-stale">' + esc(message) + '</div>';
+  if ($('metrics')) $('metrics').innerHTML = block;
+  if ($('snapshotGrid')) $('snapshotGrid').innerHTML = block;
+  if ($('inventoryChart')) $('inventoryChart').innerHTML = block;
+}
+
+function showMarketNote(message) {
+  setFreshness(message);
+  fillMarketNote(message);
+}
+
+function showMarketLoading() {
+  if ($('period')) $('period').textContent = 'Checking…';
+  setFreshness('');
+  fillMarketNote('Checking the latest market figures…');
+}
+
+function renderSavedIllustration() {
+  DATA.figureAsOf = SAVED_FIGURES_AS_OF;
+  DATA.metrics.forEach((metric) => { metric.asOf = 'as of ' + SAVED_FIGURES_AS_OF; });
+  if ($('period')) $('period').textContent = 'Unavailable';
+  setFreshness('Saved figures are as of ' + SAVED_FIGURES_AS_OF + ' and are not the current market period.');
+  renderMetrics();
+  renderSnapshot();
+  inventoryChart();
+}
+
 async function loadFeed(area = 'statewide', propertyType = 'single_family') {
   const request = ++marketRequest;
   try {
@@ -61,10 +180,14 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
     if (Array.isArray(data.car?.areas) && data.car.areas.length) {
       const selector = $('countySelect');
       if (selector) {
-        const selected = data.car.focus?.id || area;
-        selector.innerHTML = data.car.areas.filter((item) => item.type === 'statewide' || item.type === 'county')
-          .map((item) => `<option value="${esc(item.id)}">${esc(item.label)}</option>`).join('');
-        selector.value = selected;
+        const selected = selector.value || data.car.focus?.id || area;
+        const options = data.car.areas.filter((item) => item.type === 'statewide' || item.type === 'county');
+        const seen = new Set(options.map((item) => item.id));
+        CAR_COUNTIES.forEach((name) => {
+          if (!seen.has(name)) options.push({ id: name, label: name + ' County', type: 'county' });
+        });
+        selector.innerHTML = options.map((item) => `<option value="${esc(item.id)}">${esc(item.label)}</option>`).join('');
+        if ([...selector.options].some((option) => option.value === selected)) selector.value = selected;
       }
     }
 
@@ -101,19 +224,32 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
 
     if (data.car) {
       const key = propertyType === 'townhome_condo' ? 'townhome_condo' : 'single_family';
-      const isStatewide = area === 'statewide';
-      const row = isStatewide ? data.car.statewide :
-        (data.car.counties || []).find((item) => item.county === area);
-      const current = row && row[key];
-      const history = (data.car.history || []).filter((item) => item[key]).slice(-14);
-      if (current && history.length) {
-        const typeLabel = key === 'single_family' ? 'SF' : 'Townhome/Condo';
-        const focusLabel = data.car.focus?.label || (isStatewide ? 'Colorado Statewide' : area + ' County');
-        const areaLabel = focusLabel + ' ' + typeLabel;
-        if ($('marketAtGlance')) $('marketAtGlance').textContent = focusLabel + ' at a glance';
-        if ($('marketChartArea')) $('marketChartArea').textContent = areaLabel + ' trend';
-        if ($('marketDateline')) $('marketDateline').textContent = focusLabel.toUpperCase();
-        DATA.period = data.car.period_label || DATA.period;
+      const status = marketStatus(data.car, area, key);
+      const focusLabel = data.car.focus?.label || (status.view.isStatewide ? 'Colorado Statewide' : area + ' County');
+      const typeLabel = key === 'single_family' ? 'SF' : 'Townhome/Condo';
+      const areaLabel = focusLabel + ' ' + typeLabel;
+      if ($('marketAtGlance')) $('marketAtGlance').textContent = focusLabel + ' at a glance';
+      if ($('marketChartArea')) $('marketChartArea').textContent = areaLabel + ' trend';
+      if ($('marketDateline')) $('marketDateline').textContent = focusLabel.toUpperCase();
+      if ($('period')) $('period').textContent = status.currentLabel || 'Unavailable';
+      if ($('marketSource')) {
+        $('marketSource').textContent = (data.car.attribution || 'Source: Colorado Association of REALTORS®.') +
+          ' Selected: ' + areaLabel + '.';
+      }
+      shownMarketArea = area;
+      if (status.stale) {
+        DATA.figureAsOf = '';
+        showMarketNote(status.message);
+      } else {
+        let history = status.view.history.slice(-14);
+        const current = status.view.metrics;
+        if (history.length < 2) {
+          const stub = { period: status.view.seriesPeriod || newestPeriod(data.car), [key]: current };
+          history = [stub, stub];
+        }
+        DATA.figureAsOf = '';
+        DATA.metrics.forEach((metric) => { delete metric.asOf; });
+        setFreshness('');
         DATA.inventory = history.map((item) => item[key].homes_for_sale);
         DATA.sales = history.map((item) => item[key].closed_sales);
         DATA.periods = history.map((item) => {
@@ -142,15 +278,14 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
         if (ratesByLabel['30-yr fixed']) {
           DATA.metrics[3] = { ...DATA.metrics[3], value: ratesByLabel['30-yr fixed'].value, note: 'live national average' };
         }
-        if ($('period')) $('period').textContent = data.car.data_period_note || DATA.period;
-        if ($('marketSource')) {
-          $('marketSource').textContent = (data.car.attribution || 'Source: Colorado Association of REALTORS®.') +
-            ' Selected: ' + areaLabel + '.';
-        }
         renderMetrics();
         renderSnapshot();
         inventoryChart();
       }
+    } else {
+      shownMarketArea = area;
+      if ($('period')) $('period').textContent = 'Unavailable';
+      showMarketNote(staleMessage(area === 'statewide', '', ''));
     }
 
     if ($('newsList') && data.news?.length) $('newsList').innerHTML = data.news.slice(0, 6).map(nrow).join('');
@@ -169,6 +304,13 @@ async function loadFeed(area = 'statewide', propertyType = 'single_family') {
     showFeedStatus(navigator.onLine ? 'Live market feed unavailable. Displayed figures may be outdated; check back before using them.' :
       'Offline: this is a saved copy of the report. Market data and rates are not current.');
     if ($('updatedTop')) $('updatedTop').textContent = 'Live feed unavailable';
+    if (!shownMarketArea) renderSavedIllustration();
+    else if (shownMarketArea !== area) {
+      const label = $('countySelect')?.selectedOptions?.[0]?.textContent || area;
+      if ($('marketDateline')) $('marketDateline').textContent = String(label).toUpperCase();
+      if ($('marketAtGlance')) $('marketAtGlance').textContent = label + ' at a glance';
+      showMarketNote('Live market feed unavailable for this county. Older figures are not shown as current.');
+    }
     console.warn('Market feed unavailable; showing historical fallback figures.', error);
   }
 }
@@ -409,5 +551,5 @@ function setupPWA(){
   });
   if(!navigator.onLine)showFeedStatus('Offline: this is a saved copy of the report. Market data and rates are not current.');
 }
-function boot(){setupPWA();setupAudience();setupMarketControls();setDate();renderMetrics();renderSnapshot();inventoryChart();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed('statewide',$('propertyTypeSelect')?.value||'single_family')}
+function boot(){setupPWA();setupAudience();setupMarketControls();setDate();showMarketLoading();rateChart();paymentBars();renderFallbackNews();bootFallback();if($('samplePayment'))$('samplePayment').textContent='$'+Math.round(monthlyPI(450000,3.5,6.75)+250+175+(450000*.965*.0055/12)).toLocaleString()+'/mo';document.querySelectorAll('.js-tool').forEach(b=>b.addEventListener('click',()=>{openTool(b.dataset.tool);$('tools').scrollIntoView({behavior:'smooth'})}));openTool('payment');setupReferral();setupOptin();setupChat();setupReveal();loadFeed('statewide',$('propertyTypeSelect')?.value||'single_family')}
 document.readyState==='loading'?document.addEventListener('DOMContentLoaded',boot):boot();

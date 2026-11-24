@@ -27,7 +27,7 @@ window.addEventListener("beforeinstallprompt", function(event) {
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Manrope:wght@600;700;800&family=Playfair+Display:wght@600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/css/report.css?v=9">
+<link rel="stylesheet" href="assets/css/report.css?v=10">
 <script>
 !function(f,b,e,v,n,t,s){if(f.fbq)return;n=f.fbq=function(){n.callMethod?n.callMethod.apply(n,arguments):n.queue.push(arguments)};if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';n.queue=[];t=b.createElement(e);t.async=!0;t.src=v;s=b.getElementsByTagName(e)[0];s.parentNode.insertBefore(t,s)}(window,document,'script','https://connect.facebook.net/en_US/fbevents.js');fbq('init','879134155809312');fbq('track','PageView');
 </script>
@@ -58,7 +58,7 @@ window.addEventListener("beforeinstallprompt", function(event) {
 <div class="ticker"><div class="ticker-label">Markets Now</div><div class="ticker-window"><div class="ticker-track" id="tickerTrack"></div></div></div>
 <main>
 <section id="lead"><div class="wrap">
-  <div class="dateline"><span id="marketDateline">COLORADO STATEWIDE</span><span>Market period: <b id="period">June 2026</b> · CAR and live market feeds</span></div><div class="dateline" id="marketSource">Source: Colorado Association of REALTORS®. MLS data; excludes FSBO and some new construction.</div>
+  <div class="dateline"><span id="marketDateline">COLORADO STATEWIDE</span><span>Market period: <b id="period">Checking…</b> · CAR and live market feeds</span></div><div class="dateline" id="marketSource">Source: Colorado Association of REALTORS®. MLS data; excludes FSBO and some new construction.</div><div id="marketFreshness" class="market-freshness" hidden></div>
   <div class="market-controls card">
     <label>Market area<select id="countySelect"><option value="statewide">Colorado Statewide</option></select></label>
     <label>Property type<select id="propertyTypeSelect"><option value="single_family">Single-family</option><option value="townhome_condo">Townhome / Condo</option></select></label>
@@ -150,6 +150,6 @@ window.addEventListener("beforeinstallprompt", function(event) {
 
 <button class="sr-fab" id="srFab" aria-label="Ask Scott's AI desk">✦</button>
 <div class="sr-chat" id="srChat" role="dialog" aria-label="Ask Scott's AI desk"><div class="sr-chat-h"><div class="t">Ask Scott’s Desk</div><div class="s" id="chatSubtitle">AI · market & financing for agents</div><button class="x" id="srClose" aria-label="Close">×</button></div><div class="sr-chat-b" id="srBody"></div><div class="sr-chat-f"><input id="srInput" placeholder="Ask about rates, DPA, a scenario…" autocomplete="off"><button id="srSend">Send</button></div><div class="sr-chat-d">Educational only — not a rate quote or approval. For real numbers, Scott follows up personally.</div></div>
-<script src="assets/js/report.js?v=16" defer></script>
+<script src="assets/js/report.js?v=17" defer></script>
 </body>
 </html>
