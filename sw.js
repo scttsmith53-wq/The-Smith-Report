@@ -1,13 +1,13 @@
 /* The Smith Report PWA shell. Live mortgage and market APIs are never cached here. */
 const CACHE_PREFIX = 'smith-report-';
-const CORE_CACHE = CACHE_PREFIX + 'core-v9';
+const CORE_CACHE = CACHE_PREFIX + 'core-v10';
 const IMAGE_CACHE = CACHE_PREFIX + 'images-v1';
 const SHELL = [
   '/',
   '/index.html',
   '/manifest.webmanifest',
-  '/assets/css/report.css?v=9',
-  '/assets/js/report.js?v=16',
+  '/assets/css/report.css?v=10',
+  '/assets/js/report.js?v=17',
   '/assets/images/icon-192.png',
   '/assets/images/icon-512.png',
   '/assets/images/hero-denver.png',
@@ -33,6 +33,18 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(request.url);
   // External feeds, fonts, analytics, forms and chat always use the network.
   if (request.method !== 'GET' || url.origin !== self.location.origin) return;
+
+  // Same-origin data is network-first so a saved copy cannot outlive the feed.
+  if (url.pathname.endsWith('.json')) {
+    event.respondWith(fetch(request, { cache: 'no-store' }).then((response) => {
+      if (response.ok) {
+        const copy = response.clone();
+        event.waitUntil(caches.open(CORE_CACHE).then((cache) => cache.put(request, copy)));
+      }
+      return response;
+    }).catch(() => caches.match(request)));
+    return;
+  }
 
   if (request.mode === 'navigate') {
     event.respondWith(fetch(request, { cache: 'no-store' }).then((response) => {
